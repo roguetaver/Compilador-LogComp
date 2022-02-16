@@ -13,6 +13,9 @@ count = 0
 if(len(arg) <= 0):
     raise ValueError("ERROR")
 
+if('+' not in arg and '-' not in arg):
+    raise ValueError("ERROR")
+
 else:
     for n in range(0, len(arg)):
 
