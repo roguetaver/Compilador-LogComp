@@ -52,7 +52,6 @@ else:
             raise ValueError("ERROR")
 
     numbers = list(map(int, numbers))
-    print(numbers)
 
     for n in range(0, len(arg)):
         if(n == 0):
