@@ -1,71 +1,27 @@
 import sys
 
-if(len(sys.argv) <= 1):
-    raise ValueError("ERROR")
 
-arg = str(sys.argv[1])
-arg = arg.replace(" ", "")
-numbers = []
-result = 0
-actualNumber = ""
-count = 0
+class Token:
+    def __init__(self, type, value):
+        self.type = type
+        self.value = value
 
-if(len(arg) <= 0):
-    raise ValueError("ERROR")
 
-if('+' not in arg and '-' not in arg):
-    raise ValueError("ERROR")
+class Tokenizer:
+    def __init__(self, origin, position, actual):
+        self.origin = origin
+        self.position = position
+        self.actual = actual
 
-else:
-    for n in range(0, len(arg)):
+    def selectNext():
+        print("le o proximo token e atualiza o atributo atual")
 
-        if(n == 0 and (arg[n] == '+' or arg[n] == '-')):
-            raise ValueError("ERROR")
 
-        elif(arg[n] == '+'):
+class Parser:
+    token = None
 
-            if(n == len(arg) - 1):
-                raise ValueError("ERROR")
+    def parseExpression():
+        print("consome os tokens do tokenizer e analisa se a sintaze esta aderente a gramatica proposta retorna o resultado da expressão analisada")
 
-            elif(arg[n+1] == '+' or arg[n+1] == '-'):
-                raise ValueError("ERROR")
-
-            else:
-                numbers.append(actualNumber)
-                actualNumber = ""
-
-        elif(arg[n] == '-'):
-
-            if(n == len(arg) - 1):
-                raise ValueError("ERROR")
-            elif(arg[n+1] == '+' or arg[n+1] == '-'):
-                raise ValueError("ERROR")
-            else:
-                numbers.append(actualNumber)
-                actualNumber = ""
-
-        elif(arg[n].isnumeric()):
-            if(n == len(arg)-1):
-                actualNumber += arg[n]
-                numbers.append(actualNumber)
-                actualNumber = ""
-            else:
-                actualNumber += arg[n]
-        else:
-            raise ValueError("ERROR")
-
-    numbers = list(map(int, numbers))
-
-    for n in range(0, len(arg)):
-        if(n == 0):
-            result += numbers[n]
-            count += 1
-        elif(arg[n] == '+'):
-            result += numbers[count]
-            count += 1
-        elif(arg[n] == '-'):
-            result -= numbers[count]
-            count += 1
-
-    #    '1    + 9 - 2   + 33 - 14'
-    print(result)
+    def run(code):
+        print("receve o codigo fonte como argumento, inicializa im objeto tokenizador e retorna o resultado do parse expression(). Esse metodo serpa chamado pelo main()")
