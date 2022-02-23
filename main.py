@@ -8,34 +8,35 @@ class Token:
 
 
 class Tokenizer:
-    def __init__(self, origin, position, actual):
+    def __init__(self, origin):
         self.origin = origin  # codigo fonte que sera tokenizado
-        self.position = position  # posição atual que o tokenizador está separando
-        self.actual = actual  # o ultimo token separando
+        self.position = 0  # posição atual que o tokenizador está separando
+        self.actual = None  # o ultimo token separando
 
-    def selectNext():
+    def selectNext(self):
         # le o proximo token e atualiza o atributo atual
-        '''
-        se origin[position] == '+' 
-            position ++
-            actual  = Token('','plus')
-            return actual
-        se origin[position] == '-'
-            actual = Token('','minus')
-            return actual
-        se position >= len(origin)
-            actual = token('','eof')
-        se origin[position] is numeric
-            candidato = origin[position]
-            position ++
-            enquanto origin [position] is numeric
-                candidato = origin[position]
-                position++
-        else raise error
+        # TIRAR OS ESPAÇOS AQUI
 
-        [TRATAR ESPAÇOS]
-        '''
-        print("hello")
+        if(self.origin[self.position] == '+'):
+            self.position += 1
+            actual = Token('plus', 0)
+            return actual
+        elif(self.origin[self.position] == '-'):
+            actual = Token('minus', 0)
+            return actual
+        elif(self.position >= len(self.origin)):
+            actual = Token('EOF', 0)
+            return actual
+        elif(self.origin[self.position].isnumeric()):
+            cadidato = self.origin[self.position]
+            self.position += 1
+            while(self.origin[self.position.isnumeric()]):
+                cadidato += self.origin[self.position]
+                self.position += 1
+            actual = Token('numeric', cadidato)
+            return actual
+        else:
+            raise ValueError("ERROR")
 
 
 class Parser:
@@ -46,21 +47,21 @@ class Parser:
         # a gramatica proposta retorna o resultado da expressão analisada
         '''
         Se o token atual for número:
-        Copiar número para o resultado
-        Pegar próximo token
-        Enquanto token for + ou -:
-        Se o token atual é +:
-        Pegar próximo token
-        Se o token atual for número:
-        Somar o número no resultado
-        Senão ERRO
-        Se o token atual é -:
-        Pegar próximo token
-        Se o token atual for número:
-        Subtrair o número no resultado
-        Senão ERRO
-        Pegar próximo token
-        Retornar resultado
+            Copiar número para o resultado
+                Pegar próximo token
+                Enquanto token for + ou -:
+                    Se o token atual é +:
+                        Pegar próximo token(selectNext())
+                        Se o token atual for número:
+                            Somar o número no resultado
+                        Senão ERRO
+                    Se o token atual é -:
+                        Pegar próximo token(selectNext())
+                        Se o token atual for número:
+                            Subtrair o número no resultado
+                        Senão ERRO
+                Pegar próximo token
+            Retornar resultado
         Senão ERRO
         '''
 
@@ -71,3 +72,9 @@ class Parser:
         # retorna o resultado do parse expression(). Esse metodo serpa chamado pelo main()
 
         print("hello")
+
+
+if(len(sys.argv) <= 1):
+    raise ValueError("ERROR")
+
+arg = str(sys.argv[1])
