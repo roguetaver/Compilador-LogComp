@@ -17,24 +17,27 @@ class Tokenizer:
         # le o proximo token e atualiza o atributo atual
         # TIRAR OS ESPAÇOS AQUI
 
+        while(self.origin[self.position] == " "):
+            self.position += 1
+
         if(self.origin[self.position] == '+'):
             self.position += 1
-            actual = Token('plus', 0)
-            return actual
+            self.actual = Token('plus', 0)
+            return self.actual
         elif(self.origin[self.position] == '-'):
-            actual = Token('minus', 0)
-            return actual
+            self.actual = Token('minus', 0)
+            return self.actual
         elif(self.position >= len(self.origin)):
-            actual = Token('EOF', 0)
-            return actual
+            self.actual = Token('EOF', 0)
+            return self.actual
         elif(self.origin[self.position].isnumeric()):
             cadidato = self.origin[self.position]
             self.position += 1
-            while(self.origin[self.position.isnumeric()]):
+            while(self.origin[self.position].isnumeric()):
                 cadidato += self.origin[self.position]
                 self.position += 1
-            actual = Token('numeric', cadidato)
-            return actual
+            self.actual = Token('numeric', cadidato)
+            return self.actual
         else:
             raise ValueError("ERROR")
 
@@ -45,36 +48,41 @@ class Parser:
     def parseExpression():
         # consome os tokens do tokenizer e analisa se a sintaze esta aderente
         # a gramatica proposta retorna o resultado da expressão analisada
-        '''
-        Se o token atual for número:
-            Copiar número para o resultado
-                Pegar próximo token
-                Enquanto token for + ou -:
-                    Se o token atual é +:
-                        Pegar próximo token(selectNext())
-                        Se o token atual for número:
-                            Somar o número no resultado
-                        Senão ERRO
-                    Se o token atual é -:
-                        Pegar próximo token(selectNext())
-                        Se o token atual for número:
-                            Subtrair o número no resultado
-                        Senão ERRO
-                Pegar próximo token
-            Retornar resultado
-        Senão ERRO
-        '''
+        Parser.tokens.selectNext()
+        
+        if(Parser.tokens.actual.type == "numeric"):
+            resultado = Parser.tokens.actual.value
+            Parser.tokens.selectNext()
+            while(Parser.tokens.actual.type == "minus" or Parser.tokens.actual.type == "plus"):
+                if(Parser.tokens.actual.type == "minus"):
+                    Parser.tokens.selectNext()
+                    if(Parser.tokens.actual.type == "numeric"):
+                        resultado -= Parser.tokens.actual.value
+                    else:
+                        raise ValueError("ERROR")
 
-        print("hello")
+                elif(Parser.tokens.actual.type == "plus"):
+                    Parser.tokens.selectNext()
+                    if(Parser.tokens.actual.type == "numeric"):
+                        resultado += Parser.tokens.actual.value
+                    else:
+                        raise ValueError("ERROR")
+
+                Parser.tokens.selectNext()
+            return resultado
+        else:
+            raise ValueError("ERROR")
 
     def run(code):
         # receve o codigo fonte como argumento, inicializa um objeto tokenizador e
         # retorna o resultado do parse expression(). Esse metodo serpa chamado pelo main()
 
-        print("hello")
-
+        Parser.tokens = Tokenizer(code)
+        print(Parser.parseExpression())
+        return Parser.parseExpression()
 
 if(len(sys.argv) <= 1):
     raise ValueError("ERROR")
 
 arg = str(sys.argv[1])
+Parser.run(arg)
