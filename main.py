@@ -22,13 +22,13 @@ class Tokenizer:
 
         if(self.origin[self.position] == '+'):
             self.position += 1
-            self.actual = Token('plus', 0)
+            self.actual = Token("plus", 0)
             return self.actual
         elif(self.origin[self.position] == '-'):
-            self.actual = Token('minus', 0)
+            self.actual = Token("minus", 0)
             return self.actual
         elif(self.position >= len(self.origin)):
-            self.actual = Token('EOF', 0)
+            self.actual = Token("EOF", 0)
             return self.actual
         elif(self.origin[self.position].isnumeric()):
             cadidato = self.origin[self.position]
@@ -36,7 +36,7 @@ class Tokenizer:
             while(self.origin[self.position].isnumeric()):
                 cadidato += self.origin[self.position]
                 self.position += 1
-            self.actual = Token('numeric', cadidato)
+            self.actual = Token("numeric", int(cadidato))
             return self.actual
         else:
             raise ValueError("ERROR")
@@ -49,37 +49,38 @@ class Parser:
         # consome os tokens do tokenizer e analisa se a sintaze esta aderente
         # a gramatica proposta retorna o resultado da expressão analisada
         Parser.tokens.selectNext()
-        
-        if(Parser.tokens.actual.type == "numeric"):
-            resultado = Parser.tokens.actual.value
-            Parser.tokens.selectNext()
-            while(Parser.tokens.actual.type == "minus" or Parser.tokens.actual.type == "plus"):
-                if(Parser.tokens.actual.type == "minus"):
-                    Parser.tokens.selectNext()
-                    if(Parser.tokens.actual.type == "numeric"):
-                        resultado -= Parser.tokens.actual.value
-                    else:
-                        raise ValueError("ERROR")
-
-                elif(Parser.tokens.actual.type == "plus"):
-                    Parser.tokens.selectNext()
-                    if(Parser.tokens.actual.type == "numeric"):
-                        resultado += Parser.tokens.actual.value
-                    else:
-                        raise ValueError("ERROR")
-
+        while(Parser.tokens.actual.type != "EOF"):
+            if(Parser.tokens.actual.type == "numeric"):
+                resultado = Parser.tokens.actual.value
                 Parser.tokens.selectNext()
-            return resultado
-        else:
-            raise ValueError("ERROR")
+                while(Parser.tokens.actual.type == "minus" or Parser.tokens.actual.type == "plus"):
+                    if(Parser.tokens.actual.type == "minus"):
+                        Parser.tokens.selectNext()
+                        if(Parser.tokens.actual.type == "numeric"):
+                            resultado -= Parser.tokens.actual.value
+                        else:
+                            raise ValueError("ERROR")
+
+                    elif(Parser.tokens.actual.type == "plus"):
+                        Parser.tokens.selectNext()
+                        if(Parser.tokens.actual.type == "numeric"):
+                            resultado += Parser.tokens.actual.value
+                        else:
+                            raise ValueError("ERROR")
+
+                    Parser.tokens.selectNext()
+                return resultado
+            else:
+                raise ValueError("ERROR")
 
     def run(code):
         # receve o codigo fonte como argumento, inicializa um objeto tokenizador e
-        # retorna o resultado do parse expression(). Esse metodo serpa chamado pelo main()
+        # retorna o resultado do parse expression(). Esse metodo sera chamado pelo main()
 
         Parser.tokens = Tokenizer(code)
         print(Parser.parseExpression())
         return Parser.parseExpression()
+
 
 if(len(sys.argv) <= 1):
     raise ValueError("ERROR")
