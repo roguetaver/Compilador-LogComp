@@ -17,6 +17,10 @@ class Tokenizer:
         # le o proximo token e atualiza o atributo atual
         # TIRAR OS ESPAÇOS AQUI
 
+        if(self.position >= len(self.origin)):
+            self.actual = Token("EOF", 0)
+            return self.actual
+
         while(self.origin[self.position] == " "):
             self.position += 1
 
@@ -24,20 +28,24 @@ class Tokenizer:
             self.position += 1
             self.actual = Token("plus", 0)
             return self.actual
+
         elif(self.origin[self.position] == '-'):
+            self.position += 1
             self.actual = Token("minus", 0)
             return self.actual
-        elif(self.position >= len(self.origin)):
-            self.actual = Token("EOF", 0)
-            return self.actual
+
         elif(self.origin[self.position].isnumeric()):
             cadidato = self.origin[self.position]
             self.position += 1
-            while(self.origin[self.position].isnumeric()):
-                cadidato += self.origin[self.position]
-                self.position += 1
+            if(self.position < len(self.origin)):
+                while(self.origin[self.position].isnumeric()):
+                    cadidato += self.origin[self.position]
+                    self.position += 1
+                    if(self.position >= len(self.origin)):
+                        break
             self.actual = Token("numeric", int(cadidato))
             return self.actual
+
         else:
             raise ValueError("ERROR")
 
