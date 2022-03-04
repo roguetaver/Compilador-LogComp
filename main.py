@@ -59,9 +59,15 @@ class Parser:
         Parser.tokens.selectNext()
         while(Parser.tokens.actual.type != "EOF"):
             if(Parser.tokens.actual.type == "numeric"):
+
                 resultado = Parser.tokens.actual.value
                 Parser.tokens.selectNext()
+
+                if(Parser.tokens.actual.type != "minus" and Parser.tokens.actual.type != "plus"):
+                    raise ValueError("ERROR")
+
                 while(Parser.tokens.actual.type == "minus" or Parser.tokens.actual.type == "plus"):
+
                     if(Parser.tokens.actual.type == "minus"):
                         Parser.tokens.selectNext()
                         if(Parser.tokens.actual.type == "numeric"):
@@ -77,7 +83,9 @@ class Parser:
                             raise ValueError("ERROR")
 
                     Parser.tokens.selectNext()
+
                 return resultado
+
             else:
                 raise ValueError("ERROR")
 
