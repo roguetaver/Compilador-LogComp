@@ -11,7 +11,7 @@ class Token:
 class PrePro:
     @staticmethod
     def filter(code):
-        re.sub('/*?(.*?)*/', '', code, flags=re.DOTALL)
+        re.sub(re.compile("/\.?\*/", re.DOTALL), "", code)
 
 
 class Tokenizer:
@@ -41,6 +41,16 @@ class Tokenizer:
             self.actual = Token("minus", 0)
             return self.actual
 
+        elif(self.origin[self.position] == '*'):
+            self.position += 1
+            self.actual = Token("mult", 0)
+            return self.actual
+
+        elif(self.origin[self.position] == '/'):
+            self.position += 1
+            self.actual = Token("div", 0)
+            return self.actual
+
         elif(self.origin[self.position].isnumeric()):
             cadidato = self.origin[self.position]
             self.position += 1
@@ -60,6 +70,44 @@ class Tokenizer:
 class Parser:
     tokens = None  # objeto da classe que era ler o codigo fonte e alimentar o analisador
 
+    @staticmethod
+    def parseTerm():
+        # consome os tokens do tokenizer e analisa se a sintaze esta aderente
+        # a gramatica proposta retorna o resultado da expressão analisada
+        Parser.tokens.selectNext()
+        while(Parser.tokens.actual.type != "EOF"):
+            if(Parser.tokens.actual.type == "numeric"):
+
+                resultado = Parser.tokens.actual.value
+                Parser.tokens.selectNext()
+
+                if(Parser.tokens.actual.type != "mult" and Parser.tokens.actual.type != "div"):
+                    raise ValueError("ERROR")
+
+                while(Parser.tokens.actual.type == "mult" or Parser.tokens.actual.type == "div"):
+
+                    if(Parser.tokens.actual.type == "mult"):
+                        Parser.tokens.selectNext()
+                        if(Parser.tokens.actual.type == "numeric"):
+                            resultado *= Parser.tokens.actual.value
+                        else:
+                            raise ValueError("ERROR")
+
+                    elif(Parser.tokens.actual.type == "div"):
+                        Parser.tokens.selectNext()
+                        if(Parser.tokens.actual.type == "numeric"):
+                            resultado /= Parser.tokens.actual.value
+                        else:
+                            raise ValueError("ERROR")
+
+                    Parser.tokens.selectNext()
+
+                return resultado
+
+            else:
+                raise ValueError("ERROR")
+
+    @staticmethod
     def parseExpression():
         # consome os tokens do tokenizer e analisa se a sintaze esta aderente
         # a gramatica proposta retorna o resultado da expressão analisada
@@ -70,22 +118,24 @@ class Parser:
                 resultado = Parser.tokens.actual.value
                 Parser.tokens.selectNext()
 
-                if(Parser.tokens.actual.type != "minus" and Parser.tokens.actual.type != "plus"):
+                if(Parser.tokens.actual.type == "plus" or Parser.tokens.actual.type == "minus" or Parser.tokens.actual.type == "mult" or Parser.tokens.actual.type == "div"):
                     raise ValueError("ERROR")
 
-                while(Parser.tokens.actual.type == "minus" or Parser.tokens.actual.type == "plus"):
+                while(Parser.tokens.actual.type == "plus" or Parser.tokens.actual.type == "minus" or Parser.tokens.actual.type == "mult" or Parser.tokens.actual.type == "div"):
 
-                    if(Parser.tokens.actual.type == "minus"):
-                        Parser.tokens.selectNext()
-                        if(Parser.tokens.actual.type == "numeric"):
-                            resultado -= Parser.tokens.actual.value
-                        else:
-                            raise ValueError("ERROR")
+                    resultado += Parser.parseTerm()
 
-                    elif(Parser.tokens.actual.type == "plus"):
+                    if(Parser.tokens.actual.type == "plus"):
                         Parser.tokens.selectNext()
                         if(Parser.tokens.actual.type == "numeric"):
                             resultado += Parser.tokens.actual.value
+                        else:
+                            raise ValueError("ERROR")
+
+                    elif(Parser.tokens.actual.type == "minus"):
+                        Parser.tokens.selectNext()
+                        if(Parser.tokens.actual.type == "numeric"):
+                            resultado -= Parser.tokens.actual.value
                         else:
                             raise ValueError("ERROR")
 
