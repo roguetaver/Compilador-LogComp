@@ -150,6 +150,7 @@ class Parser:
         # receve o codigo fonte como argumento, inicializa um objeto tokenizador e
         # retorna o resultado do parse expression(). Esse metodo sera chamado pelo main()
 
+        PrePro.filter(code)
         Parser.tokens = Tokenizer(code)
         print(Parser.parseExpression())
         return Parser.parseExpression()
