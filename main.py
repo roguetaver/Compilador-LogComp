@@ -74,7 +74,7 @@ class Parser:
     def parseTerm():
         # consome os tokens do tokenizer e analisa se a sintaze esta aderente
         # a gramatica proposta retorna o resultado da expressão analisada
-        Parser.tokens.selectNext()
+
         while(Parser.tokens.actual.type != "EOF"):
             if(Parser.tokens.actual.type == "numeric"):
 
