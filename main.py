@@ -118,7 +118,7 @@ class Parser:
                 resultado = Parser.tokens.actual.value
                 Parser.tokens.selectNext()
 
-                if(Parser.tokens.actual.type == "plus" or Parser.tokens.actual.type == "minus" or Parser.tokens.actual.type == "mult" or Parser.tokens.actual.type == "div"):
+                if(Parser.tokens.actual.type != "plus" or Parser.tokens.actual.type != "minus" or Parser.tokens.actual.type != "mult" or Parser.tokens.actual.type != "div"):
                     raise ValueError("ERROR")
 
                 while(Parser.tokens.actual.type == "plus" or Parser.tokens.actual.type == "minus" or Parser.tokens.actual.type == "mult" or Parser.tokens.actual.type == "div"):
