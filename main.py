@@ -123,10 +123,9 @@ class Parser:
 
                 while(Parser.tokens.actual.type == "plus" or Parser.tokens.actual.type == "minus" or Parser.tokens.actual.type == "mult" or Parser.tokens.actual.type == "div"):
 
-                    if(Parser.tokens.actual == "mult" or Parser.tokens.actual == "div"):
-                        resultado += Parser.parseTerm()
+                    Parser.parseTerm()
 
-                    elif(Parser.tokens.actual.type == "plus"):
+                    if(Parser.tokens.actual.type == "plus"):
                         Parser.tokens.selectNext()
                         if(Parser.tokens.actual.type == "numeric"):
                             resultado += Parser.tokens.actual.value
