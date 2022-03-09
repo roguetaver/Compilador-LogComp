@@ -1,10 +1,17 @@
 import sys
+import re
 
 
 class Token:
     def __init__(self, type, value):
         self.type = type  # tipo do token
         self.value = value  # valor do token
+
+
+class PrePro:
+    @staticmethod
+    def filter(code):
+        re.sub('/*?(.*?)*/', '', code, flags=re.DOTALL)
 
 
 class Tokenizer:
