@@ -6,4 +6,6 @@ Compilador da disciplina Logica Computacional
 
 Roteiro 1
 
-![Alt text](diagrama-roteiro1.png?raw=true "Diagrama Sintático")
+![Alt text](diagrama-roteiro1.png?raw=true "Diagrama Sintático Roteiro 1")
+
+![Alt text](diagrama-roteiro2.png?raw=true "Diagrama Sintático Roteiro 2 (ATUAL)")
