@@ -142,7 +142,7 @@ class Parser:
         # retorna o resultado do parse expression(). Esse metodo sera chamado pelo main()
         postProCode = PrePro.filter(code)
         Parser.tokens = Tokenizer(postProCode)
-        print(Parser.parseExpression())
+        print(int(Parser.parseExpression()))
         return Parser.parseExpression()
 
 
