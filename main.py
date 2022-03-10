@@ -11,7 +11,7 @@ class Token:
 class PrePro:
     @staticmethod
     def filter(code):
-        re.sub(re.compile("/\.?\*/", re.DOTALL), "", code)
+        return re.sub("/\*.*?\*/", "", code)
 
 
 class Tokenizer:
@@ -74,7 +74,7 @@ class Parser:
     def parseTerm():
         # consome os tokens do tokenizer e analisa se a sintaze esta aderente
         # a gramatica proposta retorna o resultado da expressão analisada
-        Parser.tokens.selectNext()
+
         while(Parser.tokens.actual.type != "EOF"):
             if(Parser.tokens.actual.type == "numeric"):
 
@@ -111,40 +111,37 @@ class Parser:
     def parseExpression():
         # consome os tokens do tokenizer e analisa se a sintaze esta aderente
         # a gramatica proposta retorna o resultado da expressão analisada
-        while(Parser.tokens.actual.type != "EOF"):
-            resultado = Parser.parseTerm()
+        Parser.tokens.selectNext()
+        resultado = Parser.parseTerm()
+
+        if(Parser.tokens.actual.type == "numeric"):
+            raise ValueError("ERROR")
+
+        while((Parser.tokens.actual.type == "minus" or Parser.tokens.actual.type == "plus") and Parser.tokens.actual.type != "EOF"):
+
+            if(Parser.tokens.actual.type == "minus"):
+                Parser.tokens.selectNext()
+                if(Parser.tokens.actual.type == "numeric"):
+                    resultado -= Parser.parseTerm()
+                else:
+                    raise ValueError("ERROR")
+
+            elif(Parser.tokens.actual.type == "plus"):
+                Parser.tokens.selectNext()
+                if(Parser.tokens.actual.type == "numeric"):
+                    resultado += Parser.parseTerm()
+                else:
+                    raise ValueError("ERROR")
 
             Parser.tokens.selectNext()
 
-            if(Parser.tokens.actual.type == "numeric"):
-                raise ValueError("ERROR")
-
-            while(Parser.tokens.actual.type == "plus" or Parser.tokens.actual.type == "minus"):
-
-                if(Parser.tokens.actual.type == "plus"):
-                    Parser.tokens.selectNext()
-                    if(Parser.tokens.actual.type == "numeric"):
-                        resultado += Parser.parseTerm()
-                    else:
-                        raise ValueError("ERROR")
-
-                elif(Parser.tokens.actual.type == "minus"):
-                    Parser.tokens.selectNext()
-                    if(Parser.tokens.actual.type == "numeric"):
-                        resultado -= Parser.parseTerm()
-                    else:
-                        raise ValueError("ERROR")
-
-                Parser.tokens.selectNext()
-
-            return resultado
+        return resultado
 
     def run(code):
         # receve o codigo fonte como argumento, inicializa um objeto tokenizador e
         # retorna o resultado do parse expression(). Esse metodo sera chamado pelo main()
-
-        PrePro.filter(code)
-        Parser.tokens = Tokenizer(code)
+        postProCode = PrePro.filter(code)
+        Parser.tokens = Tokenizer(postProCode)
         print(Parser.parseExpression())
         return Parser.parseExpression()
 
