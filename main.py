@@ -22,14 +22,15 @@ class Tokenizer:
 
     def selectNext(self):
         # le o proximo token e atualiza o atributo atual
-        # TIRAR OS ESPAÇOS AQUI
-
         if(self.position >= len(self.origin)):
             self.actual = Token("EOF", 0)
             return self.actual
 
         while(self.origin[self.position] == " "):
             self.position += 1
+            if(self.position >= len(self.origin)):
+                self.actual = Token("EOF", 0)
+                return self.actual
 
         if(self.origin[self.position] == '+'):
             self.position += 1
@@ -132,8 +133,6 @@ class Parser:
                     resultado += Parser.parseTerm()
                 else:
                     raise ValueError("ERROR")
-
-            Parser.tokens.selectNext()
 
         return resultado
 
