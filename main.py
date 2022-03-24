@@ -14,6 +14,49 @@ class PrePro:
         return re.sub("/\*.*?\*/", "", code)
 
 
+class Node:
+    def __init__(self, value, children):
+        self.value = value
+        self.children = children
+
+    def Evaluate(self):
+        pass
+
+
+class BinOp(Node):
+
+    def Evaluate(self):
+        if(self.value == "+"):
+            return self.children[0].Evaluate() + self.children[1].Evaluate()
+        elif (self.value == "-"):
+            return self.children[0].Evaluate() - self.children[1].Evaluate()
+        elif (self.value == "*"):
+            return self.children[0].Evaluate() * self.children[1].Evaluate()
+        elif (self.value == "/"):
+            return self.children[0].Evaluate() // self.children[1].Evaluate()
+
+
+class UnOp(Node):
+
+    def Evaluate(self):
+        if(self.value == "+"):
+            return self.children[0].Evaluate()
+        elif (self.value == "-"):
+            return -self.children[0].Evaluate()
+
+
+class IntVal(Node):
+
+    def Evaluate(self):
+        return self.value
+
+
+class NoOp(Node):
+
+    def Evaluate(self):
+        pass
+
+
 class Tokenizer:
     def __init__(self, origin):
         self.origin = origin  # codigo fonte que sera tokenizado
@@ -87,20 +130,21 @@ class Parser:
         # a gramatica proposta retorna o resultado da expressão analisada
 
         if(Parser.tokens.actual.type == "numeric"):
-            resultado = Parser.tokens.actual.value
+            node = IntVal(Parser.tokens.actual.value,
+                          [])
             Parser.tokens.selectNext()
 
         elif(Parser.tokens.actual.type == "minus"):
             Parser.tokens.selectNext()
-            resultado = -Parser.parseFactor()
+            node = UnOp('-', [Parser.parseFactor()])
 
         elif(Parser.tokens.actual.type == "plus"):
             Parser.tokens.selectNext()
-            resultado = Parser.parseFactor()
+            node = UnOp('+', [Parser.parseFactor()])
 
         elif(Parser.tokens.actual.type == "openParentheses"):
             Parser.tokens.selectNext()
-            resultado = Parser.parseExpression()
+            node = Parser.parseExpression()
             if(Parser.tokens.actual.type == "closeParentheses"):
                 Parser.tokens.selectNext()
             else:
@@ -109,47 +153,52 @@ class Parser:
         else:
             raise ValueError("ERROR")
 
-        return resultado
+        return node
 
     @staticmethod
     def parseTerm():
        # consome os tokens do tokenizer e analisa se a sintaze esta aderente
         # a gramatica proposta retorna o resultado da expressão analisada
-        resultado = Parser.parseFactor()
+
+        node = Parser.parseFactor()
 
         while((Parser.tokens.actual.type == "mult" or Parser.tokens.actual.type == "div")):
 
             if(Parser.tokens.actual.type == "mult"):
                 Parser.tokens.selectNext()
-                resultado *= Parser.parseFactor()
+                node = BinOp('*', [node, Parser.parseFactor()])
 
             elif(Parser.tokens.actual.type == "div"):
                 Parser.tokens.selectNext()
-                resultado //= Parser.parseFactor()
+                node = BinOp('/', [node, Parser.parseFactor()])
 
-        return resultado
+        return node
 
     @staticmethod
     def parseExpression():
         # consome os tokens do tokenizer e analisa se a sintaze esta aderente
         # a gramatica proposta retorna o resultado da expressão analisada
-        resultado = Parser.parseTerm()
+
+        node = Parser.parseTerm()
 
         while((Parser.tokens.actual.type == "minus" or Parser.tokens.actual.type == "plus")):
 
             if(Parser.tokens.actual.type == "minus"):
                 Parser.tokens.selectNext()
-                resultado -= Parser.parseTerm()
+                node = BinOp('-', [node, Parser.parseTerm()])
 
             elif(Parser.tokens.actual.type == "plus"):
                 Parser.tokens.selectNext()
-                resultado += Parser.parseTerm()
+                node = BinOp('+', [node, Parser.parseTerm()])
 
-        return resultado
+        return node
 
     def run(code):
         # receve o codigo fonte como argumento, inicializa um objeto tokenizador e
         # retorna o resultado do parse expression(). Esse metodo sera chamado pelo main()
+        f = open(code, "r")
+        code = f.read()
+        f.close()
         postProCode = PrePro.filter(code)
         Parser.tokens = Tokenizer(postProCode)
         Parser.tokens.selectNext()
@@ -157,11 +206,12 @@ class Parser:
         result = Parser.parseExpression()
         if(Parser.tokens.actual.type != "EOF"):
             raise ValueError("ERROR")
-        return result
+        return result.Evaluate()
 
 
 if(len(sys.argv) <= 1):
     raise ValueError("ERROR")
+
 
 arg = str(sys.argv[1])
 print(Parser.run(arg))
