@@ -11,7 +11,7 @@ class SymbolTable:
 
     def setIdentifier(identifierName, value):
         SymbolTable.symbolTableDict[identifierName] = value
-        return
+        pass
 
 
 class Token:
@@ -137,7 +137,7 @@ class Tokenizer:
             self.actual = Token("semicolon", 0)
             return self.actual
 
-        # token idenfier
+        # token identifier
         # token printf
 
         elif(self.origin[self.position].isnumeric()):
