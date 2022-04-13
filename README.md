@@ -18,7 +18,12 @@ Roteiro 3 - OK
 ![Alt text](diagrama-roteiro3.png?raw=true "Diagrama Sintático Roteiro 3")
 ![Alt text](EBNF-roteiro3.png?raw=true "EBNF Roteiro 3")
 
-Roteiro 4 - Atual
+Roteiro 4 - OK
 
-![Alt text](diagrama-roteiro3.png?raw=true "Diagrama Sintático Roteiro 4 (ATUAL)")
-![Alt text](EBNF-roteiro3.png?raw=true "EBNF Roteiro 4 (ATUAL)")
+![Alt text](diagrama-roteiro3.png?raw=true "Diagrama Sintático Roteiro 4 (OK)")
+![Alt text](EBNF-roteiro3.png?raw=true "EBNF Roteiro 4 (OK)")
+
+Roteiro 5 - ATUAl
+
+![Alt text](diagrama-roteiro5.png?raw=true "Diagrama Sintático Roteiro 5 (ATUAL)")
+![Alt text](EBNF-roteiro5.png?raw=true "EBNF Roteiro 5 (ATUAl)")

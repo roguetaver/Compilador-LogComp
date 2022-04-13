@@ -2,6 +2,18 @@ import sys
 import re
 
 
+class SymbolTable:
+    symbolTableDict = {}
+
+    @staticmethod
+    def getIdentifier(identifierName):
+        return SymbolTable.symbolTableDict.get(identifierName)
+
+    def setIdentifier(identifierName, value):
+        SymbolTable.symbolTableDict[identifierName] = value
+        return
+
+
 class Token:
     def __init__(self, type, value):
         self.type = type  # tipo do token
@@ -69,7 +81,7 @@ class Tokenizer:
             self.actual = Token("EOF", 0)
             return self.actual
 
-        while(self.origin[self.position] == " "):
+        while(self.origin[self.position] == " " or self.origin[self.position] == "\n"):
             self.position += 1
             if(self.position >= len(self.origin)):
                 self.actual = Token("EOF", 0)
@@ -104,6 +116,29 @@ class Tokenizer:
             self.position += 1
             self.actual = Token("closeParentheses", 0)
             return self.actual
+
+        elif(self.origin[self.position] == '{'):
+            self.position += 1
+            self.actual = Token("openCurlyBrackets", 0)
+            return self.actual
+
+        elif(self.origin[self.position] == '}'):
+            self.position += 1
+            self.actual = Token("closeCurlyBrackets", 0)
+            return self.actual
+
+        elif(self.origin[self.position] == '='):
+            self.position += 1
+            self.actual = Token("assign", 0)
+            return self.actual
+
+        elif(self.origin[self.position] == ';'):
+            self.position += 1
+            self.actual = Token("semicolon", 0)
+            return self.actual
+
+        # token idenfier
+        # token printf
 
         elif(self.origin[self.position].isnumeric()):
             cadidato = self.origin[self.position]
