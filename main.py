@@ -70,6 +70,9 @@ class NoOp(Node):
 
 
 class Tokenizer:
+
+    reservedWords = ["printf"]
+
     def __init__(self, origin):
         self.origin = origin  # codigo fonte que sera tokenizado
         self.position = 0  # posição atual que o tokenizador está separando
@@ -137,19 +140,33 @@ class Tokenizer:
             self.actual = Token("semicolon", 0)
             return self.actual
 
-        # token identifier
-        # token printf
-
-        elif(self.origin[self.position].isnumeric()):
-            cadidato = self.origin[self.position]
+        elif(self.origin[self.position].isalpha()):
+            candidato = self.origin[self.position]
             self.position += 1
             if(self.position < len(self.origin)):
-                while(self.origin[self.position].isnumeric()):
-                    cadidato += self.origin[self.position]
+                while(self.origin[self.position].isalpha() or self.origin[self.position] == '_' or self.origin[self.position].isnumeric()):
+                    candidato += self.origin[self.position]
                     self.position += 1
                     if(self.position >= len(self.origin)):
                         break
-            self.actual = Token("numeric", int(cadidato))
+            if(candidato in Tokenizer.reservedWords):
+                self.actual = Token(candidato, 0)
+            else:
+                self.actual = Token("identifier", candidato)
+                SymbolTable.setIdentifier(candidato, 0)
+
+            return self.actual
+
+        elif(self.origin[self.position].isnumeric()):
+            candidato = self.origin[self.position]
+            self.position += 1
+            if(self.position < len(self.origin)):
+                while(self.origin[self.position].isnumeric()):
+                    candidato += self.origin[self.position]
+                    self.position += 1
+                    if(self.position >= len(self.origin)):
+                        break
+            self.actual = Token("numeric", int(candidato))
             return self.actual
 
         else:
@@ -158,6 +175,27 @@ class Tokenizer:
 
 class Parser:
     tokens = None  # objeto da classe que era ler o codigo fonte e alimentar o analisador
+
+    @staticmethod
+    def parseBlock():
+        if(Parser.tokens.actual.type == "openCurlyBrackets"):
+            Parser.tokens.selectNext()
+            # statement
+            if(Parser.tokens.actual.type == "closeCurlyBrackets"):
+                Parser.tokens.selectNext()
+            else:
+                raise ValueError("ERROR")
+        else:
+            raise ValueError("ERROR")
+
+    @staticmethod
+    def parseStatement():
+        if(Parser.tokens.actual.type == "identifier"):
+            Parser.tokens.selectNext()
+            node = BinOp('=', [node, Parser.parseExpression()])
+            if(Parser.tokens.actual.type == "assign"):
+                node = BinOp('=', [node, Parser.parseExpression()])
+                Parser.tokens.selectNext()
 
     @staticmethod
     def parseFactor():
