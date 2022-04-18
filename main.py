@@ -7,11 +7,13 @@ class SymbolTable:
 
     @staticmethod
     def getIdentifier(identifierName):
-        return SymbolTable.symbolTableDict.get(identifierName)
+        if(identifierName in SymbolTable.symbolTableDict.keys()):
+            return SymbolTable.symbolTableDict.get(identifierName)
+        else:
+            raise ValueError("ERROR")
 
     def setIdentifier(identifierName, value):
         SymbolTable.symbolTableDict[identifierName] = value
-        pass
 
 
 class Token:
