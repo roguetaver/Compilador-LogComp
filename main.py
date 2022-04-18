@@ -46,6 +46,8 @@ class BinOp(Node):
             return self.children[0].Evaluate() * self.children[1].Evaluate()
         elif (self.value == "/"):
             return self.children[0].Evaluate() // self.children[1].Evaluate()
+        elif (self.value == "="):
+            SymbolTable.setIdentifier(self.children[0].value, self.children[1].Evaluate())
 
 
 class UnOp(Node):
@@ -67,6 +69,25 @@ class NoOp(Node):
 
     def Evaluate(self):
         pass
+
+
+class Identifier(Node):
+
+    def Evaluate(self):
+        return SymbolTable.getIdentifier(self.value)
+
+
+class Printf(Node):
+
+    def Evaluate(self):
+        print(self.children[0].Evaluate())
+
+class Block(Node):
+
+    def Evaluate(self):
+        for child in self.children:
+            child.Evaluate()
+
 
 
 class Tokenizer:
@@ -150,10 +171,9 @@ class Tokenizer:
                     if(self.position >= len(self.origin)):
                         break
             if(candidato in Tokenizer.reservedWords):
-                self.actual = Token(candidato, 0)
+                self.actual = Token(candidato, candidato)
             else:
                 self.actual = Token("identifier", candidato)
-                SymbolTable.setIdentifier(candidato, 0)
 
             return self.actual
 
@@ -178,33 +198,68 @@ class Parser:
 
     @staticmethod
     def parseBlock():
+        children = []
         if(Parser.tokens.actual.type == "openCurlyBrackets"):
             Parser.tokens.selectNext()
-            # statement
-            if(Parser.tokens.actual.type == "closeCurlyBrackets"):
-                Parser.tokens.selectNext()
-            else:
-                raise ValueError("ERROR")
+            while (Parser.tokens.actual.type != "closeCurlyBrackets"):
+                children.append(Parser.parseStatement())
+            node = Block(0,children)
+            Parser.tokens.selectNext()
         else:
             raise ValueError("ERROR")
+        return node
 
     @staticmethod
     def parseStatement():
         if(Parser.tokens.actual.type == "identifier"):
+            node = Identifier(Parser.tokens.actual.value, [])
             Parser.tokens.selectNext()
-            node = BinOp('=', [node, Parser.parseExpression()])
             if(Parser.tokens.actual.type == "assign"):
-                node = BinOp('=', [node, Parser.parseExpression()])
                 Parser.tokens.selectNext()
+                node = BinOp('=', [node, Parser.parseExpression()])
+                if(Parser.tokens.actual.type == "semicolon"):
+                    Parser.tokens.selectNext()
+                else:
+                    raise ValueError("ERROR")
+            else:
+                raise ValueError("ERROR")
+        
+        elif(Parser.tokens.actual.type == "printf"):
+            Parser.tokens.selectNext()
+            if(Parser.tokens.actual.type == "openParentheses"):
+                Parser.tokens.selectNext()
+                node = Printf("printf", [Parser.parseExpression()])
+                if(Parser.tokens.actual.type == "closeParentheses"):
+                    Parser.tokens.selectNext()
+                    if(Parser.tokens.actual.type == "semicolon"):
+                        Parser.tokens.selectNext()
+                    else:
+                        raise ValueError("ERROR")
+                else:
+                    raise ValueError("ERROR")
+            else:
+                raise ValueError("ERROR")
+        
+        elif(Parser.tokens.actual.type == "semicolon"):
+            node = NoOp(0,[])
+            Parser.tokens.selectNext()
+        
+        else:
+            raise ValueError("ERROR")
+
+        return node
+         
 
     @staticmethod
     def parseFactor():
         # consome os tokens do tokenizer e analisa se a sintaze esta aderente
         # a gramatica proposta retorna o resultado da expressão analisada
-
         if(Parser.tokens.actual.type == "numeric"):
-            node = IntVal(Parser.tokens.actual.value,
-                          [])
+            node = IntVal(Parser.tokens.actual.value, [])
+            Parser.tokens.selectNext()
+        
+        elif(Parser.tokens.actual.type == "identifier"):
+            node = Identifier(Parser.tokens.actual.value, [])
             Parser.tokens.selectNext()
 
         elif(Parser.tokens.actual.type == "minus"):
@@ -276,7 +331,7 @@ class Parser:
         Parser.tokens = Tokenizer(postProCode)
         Parser.tokens.selectNext()
 
-        result = Parser.parseExpression()
+        result = Parser.parseBlock()
         if(Parser.tokens.actual.type != "EOF"):
             raise ValueError("ERROR")
         return result.Evaluate()
@@ -287,4 +342,5 @@ if(len(sys.argv) <= 1):
 
 
 arg = str(sys.argv[1])
-print(Parser.run(arg))
+Parser.run(arg)
+print(SymbolTable.symbolTableDict)
