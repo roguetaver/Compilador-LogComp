@@ -225,7 +225,7 @@ class Parser:
                 raise ValueError("ERROR")
         
         elif(Parser.tokens.actual.type == "printf"):
-            
+
             Parser.tokens.selectNext()
             if(Parser.tokens.actual.type == "openParentheses"):
                 Parser.tokens.selectNext()
@@ -344,4 +344,3 @@ if(len(sys.argv) <= 1):
 
 arg = str(sys.argv[1])
 Parser.run(arg)
-print(SymbolTable.symbolTableDict)
