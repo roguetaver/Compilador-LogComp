@@ -225,6 +225,7 @@ class Parser:
                 raise ValueError("ERROR")
         
         elif(Parser.tokens.actual.type == "printf"):
+            
             Parser.tokens.selectNext()
             if(Parser.tokens.actual.type == "openParentheses"):
                 Parser.tokens.selectNext()
