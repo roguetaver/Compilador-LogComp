@@ -1,7 +1,6 @@
 import sys
 import re
 
-
 class SymbolTable:
     symbolTableDict = {}
 
@@ -10,7 +9,7 @@ class SymbolTable:
         if(identifierName in SymbolTable.symbolTableDict.keys()):
             return SymbolTable.symbolTableDict.get(identifierName)
         else:
-            raise ValueError("ERROR")
+            raise ValueError("Symbol Table ERROR - Identifier not in symbol table")
 
     def setIdentifier(identifierName, value):
         SymbolTable.symbolTableDict[identifierName] = value
@@ -89,7 +88,6 @@ class Block(Node):
     def Evaluate(self):
         for child in self.children:
             child.Evaluate()
-
 
 
 class Tokenizer:
@@ -192,7 +190,7 @@ class Tokenizer:
             return self.actual
 
         else:
-            raise ValueError("ERROR")
+            raise ValueError("Tokenizer ERROR - token not found")
 
 
 class Parser:
@@ -208,7 +206,7 @@ class Parser:
             node = Block(0,children)
             Parser.tokens.selectNext()
         else:
-            raise ValueError("ERROR")
+            raise ValueError("parseBlock ERROR - opened Curly Brackets token not found ")
         return node
 
     @staticmethod
@@ -222,33 +220,33 @@ class Parser:
                 if(Parser.tokens.actual.type == "semicolon"):
                     Parser.tokens.selectNext()
                 else:
-                    raise ValueError("ERROR")
+                    raise ValueError("parseStatement ERROR - semicolon token not found")
             else:
-                raise ValueError("ERROR")
+                raise ValueError("parseStatement ERROR - assign token not found")
         
         elif(Parser.tokens.actual.type == "printf"):
 
             Parser.tokens.selectNext()
             if(Parser.tokens.actual.type == "openParentheses"):
                 Parser.tokens.selectNext()
-                node = Printf("printf", [Parser.parseExpression()])
+                node = Printf(0, [Parser.parseExpression()])
                 if(Parser.tokens.actual.type == "closeParentheses"):
                     Parser.tokens.selectNext()
                     if(Parser.tokens.actual.type == "semicolon"):
                         Parser.tokens.selectNext()
                     else:
-                        raise ValueError("ERROR")
+                        raise ValueError("parseStatement ERROR - semicolon token not found")
                 else:
-                    raise ValueError("ERROR")
+                    raise ValueError("parseStatement ERROR - closed Parentheses token not found")
             else:
-                raise ValueError("ERROR")
+                raise ValueError("parseStatement ERROR - opened Parentheses token not found")
         
         elif(Parser.tokens.actual.type == "semicolon"):
             node = NoOp(0,[])
             Parser.tokens.selectNext()
         
         else:
-            raise ValueError("ERROR")
+            raise ValueError("parseStatement ERROR - token not found")
 
         return node
          
@@ -279,10 +277,10 @@ class Parser:
             if(Parser.tokens.actual.type == "closeParentheses"):
                 Parser.tokens.selectNext()
             else:
-                raise ValueError("ERROR")
+                raise ValueError("parseFactor ERROR - closed Parentheses token not found")
 
         else:
-            raise ValueError("ERROR")
+            raise ValueError("parseFactor ERROR - token not found")
 
         return node
 
@@ -336,12 +334,12 @@ class Parser:
 
         result = Parser.parseBlock()
         if(Parser.tokens.actual.type != "EOF"):
-            raise ValueError("ERROR")
+            raise ValueError("run ERROR - EOF token not found")
         return result.Evaluate()
 
 
 if(len(sys.argv) <= 1):
-    raise ValueError("ERROR")
+    raise ValueError("ERROR - missing input")
 
 
 arg = str(sys.argv[1])
