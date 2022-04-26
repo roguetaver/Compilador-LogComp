@@ -201,11 +201,6 @@ class Tokenizer:
             self.actual = Token("closeCurlyBrackets", 0)
             return self.actual
 
-        elif(self.origin[self.position] == '='):
-            self.position += 1
-            self.actual = Token("assign", 0)
-            return self.actual
-
         elif(self.origin[self.position] == ';'):
             self.position += 1
             self.actual = Token("semicolon", 0)
@@ -229,6 +224,11 @@ class Tokenizer:
         elif(self.origin[self.position] == '=' and self.origin[self.position + 1] == '='):
             self.position += 2
             self.actual = Token("compare", 0)
+            return self.actual
+
+        elif(self.origin[self.position] == '='):
+            self.position += 1
+            self.actual = Token("assign", 0)
             return self.actual
 
         elif(self.origin[self.position] == '&' and self.origin[self.position + 1] == '&'):
