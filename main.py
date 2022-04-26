@@ -83,7 +83,8 @@ class UnOp(Node):
 class AssignOp(Node):
 
     def Evaluate(self):
-        return SymbolTable.setIdentifier(self.children[0].value, self.children[1].Evaluate())
+        SymbolTable.setIdentifier(
+            self.children[0].value, self.children[1].Evaluate())
 
 
 class IntVal(Node):
@@ -254,7 +255,6 @@ class Tokenizer:
                 self.actual = Token(candidato, 0)
             else:
                 self.actual = Token("identifier", candidato)
-                SymbolTable.setIdentifier(candidato, 0)
 
             return self.actual
 
@@ -348,9 +348,11 @@ class Parser:
                     Parser.tokens.selectNext()
                     block = Parser.parseStatement()
                 else:
-                    raise ValueError("ERROR")
+                    raise ValueError(
+                        "parseStatement ERROR - closed Parentheses token not found")
             else:
-                raise ValueError("ERROR")
+                raise ValueError(
+                    "parseStatement ERROR - opened Parentheses token not found")
 
             node = While("while", [expression, block])
 
@@ -369,7 +371,8 @@ class Parser:
                     children.append(block)
 
                 else:
-                    raise ValueError("ERROR")
+                    raise ValueError(
+                        "parseStatement ERROR - closed Parentheses token not found")
 
                 if Parser.tokens.actual.type == "else":
                     Parser.tokens.selectNext()
@@ -377,7 +380,8 @@ class Parser:
                     children.append(elseExpression)
 
             else:
-                raise ValueError("ERROR")
+                raise ValueError(
+                    "parseStatement ERROR - opened Parentheses token not found")
 
             node = If("if", children)
 
@@ -432,9 +436,11 @@ class Parser:
                 if Parser.tokens.actual.type == "closeParentheses":
                     Parser.tokens.selectNext()
                 else:
-                    raise ValueError("ERROR")
+                    raise ValueError(
+                        "parseFactor ERROR - closed Parentheses token not found")
             else:
-                raise ValueError("ERROR")
+                raise ValueError(
+                    "parseFactor ERROR - opened Parentheses token not found")
 
             node = Scanf('scanf', [])
 
