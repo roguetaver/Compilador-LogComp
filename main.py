@@ -293,12 +293,17 @@ class Parser:
 
     @staticmethod
     def parseStatement():
+
         if(Parser.tokens.actual.type == "identifier"):
+
             node = Identifier(Parser.tokens.actual.value, [])
             Parser.tokens.selectNext()
+
             if(Parser.tokens.actual.type == "assign"):
+
                 Parser.tokens.selectNext()
-                node = AssignOp('=', [node, Parser.parseExpression()])
+                node = AssignOp('=', [node, Parser.parseRelExpression()])
+
                 if(Parser.tokens.actual.type == "semicolon"):
                     Parser.tokens.selectNext()
                 else:
@@ -312,10 +317,13 @@ class Parser:
 
             Parser.tokens.selectNext()
             if(Parser.tokens.actual.type == "openParentheses"):
+
                 Parser.tokens.selectNext()
-                node = Printf(0, [Parser.parseExpression()])
+                node = Printf("printf", [Parser.parseRelExpression()])
+
                 if(Parser.tokens.actual.type == "closeParentheses"):
                     Parser.tokens.selectNext()
+
                     if(Parser.tokens.actual.type == "semicolon"):
                         Parser.tokens.selectNext()
                     else:
@@ -327,6 +335,51 @@ class Parser:
             else:
                 raise ValueError(
                     "parseStatement ERROR - opened Parentheses token not found")
+
+        elif(Parser.tokens.actual.type == "openCurlyBrackets"):
+            node = Parser.parseBlock()
+
+        elif Parser.tokens.actual.type == "while":
+            Parser.tokens.selectNext()
+            if Parser.tokens.actual.type == "openParentheses":
+                Parser.tokens.selectNext()
+                expression = Parser.parseRelExpression()
+                if Parser.tokens.actual.type == "closeParentheses":
+                    Parser.tokens.selectNext()
+                    block = Parser.parseStatement()
+                else:
+                    raise ValueError("ERROR")
+            else:
+                raise ValueError("ERROR")
+
+            node = While("while", [expression, block])
+
+        elif Parser.tokens.actual.type == "if":
+
+            children = []
+            Parser.tokens.selectNext()
+            if Parser.tokens.actual.type == "openParentheses":
+                Parser.tokens.selectNext()
+                expression = Parser.parseRelExpression()
+                children.append(expression)
+
+                if Parser.tokens.actual.type == "closeParentheses":
+                    Parser.tokens.selectNext()
+                    block = Parser.parseStatement()
+                    children.append(block)
+
+                else:
+                    raise ValueError("ERROR")
+
+                if Parser.tokens.actual.type == "else":
+                    Parser.tokens.selectNext()
+                    elseExpression = Parser.parseStatement()
+                    children.append(elseExpression)
+
+            else:
+                raise ValueError("ERROR")
+
+            node = If("if", children)
 
         elif(Parser.tokens.actual.type == "semicolon"):
             node = NoOp(0, [])
@@ -341,6 +394,7 @@ class Parser:
     def parseFactor():
         # consome os tokens do tokenizer e analisa se a sintaze esta aderente
         # a gramatica proposta retorna o resultado da expressão analisada
+
         if(Parser.tokens.actual.type == "numeric"):
             node = IntVal(Parser.tokens.actual.value, [])
             Parser.tokens.selectNext()
@@ -357,14 +411,32 @@ class Parser:
             Parser.tokens.selectNext()
             node = UnOp('+', [Parser.parseFactor()])
 
+        elif(Parser.tokens.actual.type == "not"):
+            Parser.tokens.selectNext()
+            node = UnOp('!', [Parser.parseFactor()])
+
         elif(Parser.tokens.actual.type == "openParentheses"):
             Parser.tokens.selectNext()
-            node = Parser.parseExpression()
+            node = Parser.parseRelExpression()
             if(Parser.tokens.actual.type == "closeParentheses"):
                 Parser.tokens.selectNext()
             else:
                 raise ValueError(
                     "parseFactor ERROR - closed Parentheses token not found")
+
+        elif(Parser.tokens.actual.type == "scanf"):
+
+            Parser.tokens.selectNext()
+            if Parser.tokens.actual.type == "openParentheses":
+                Parser.tokens.selectNext()
+                if Parser.tokens.actual.type == "closeParentheses":
+                    Parser.tokens.selectNext()
+                else:
+                    raise ValueError("ERROR")
+            else:
+                raise ValueError("ERROR")
+
+            node = Scanf('scanf', [])
 
         else:
             raise ValueError("parseFactor ERROR - token not found")
@@ -373,12 +445,11 @@ class Parser:
 
     @staticmethod
     def parseTerm():
-       # consome os tokens do tokenizer e analisa se a sintaze esta aderente
         # a gramatica proposta retorna o resultado da expressão analisada
 
         node = Parser.parseFactor()
 
-        while((Parser.tokens.actual.type == "mult" or Parser.tokens.actual.type == "div")):
+        while((Parser.tokens.actual.type == "mult" or Parser.tokens.actual.type == "div" or Parser.tokens.actual.type == "and")):
 
             if(Parser.tokens.actual.type == "mult"):
                 Parser.tokens.selectNext()
@@ -388,16 +459,18 @@ class Parser:
                 Parser.tokens.selectNext()
                 node = BinOp('/', [node, Parser.parseFactor()])
 
+            elif(Parser.tokens.actual.type == "and"):
+                Parser.tokens.selectNext()
+                node = BinOp('&&', [node, Parser.parseFactor()])
+
         return node
 
     @staticmethod
     def parseExpression():
-        # consome os tokens do tokenizer e analisa se a sintaze esta aderente
-        # a gramatica proposta retorna o resultado da expressão analisada
 
         node = Parser.parseTerm()
 
-        while((Parser.tokens.actual.type == "minus" or Parser.tokens.actual.type == "plus")):
+        while((Parser.tokens.actual.type == "minus" or Parser.tokens.actual.type == "plus" or Parser.tokens.actual.type == "or")):
 
             if(Parser.tokens.actual.type == "minus"):
                 Parser.tokens.selectNext()
@@ -407,11 +480,37 @@ class Parser:
                 Parser.tokens.selectNext()
                 node = BinOp('+', [node, Parser.parseTerm()])
 
+            elif(Parser.tokens.actual.type == "or"):
+                Parser.tokens.selectNext()
+                node = BinOp('||', [node, Parser.parseTerm()])
+
+        return node
+
+    @staticmethod
+    def parseRelExpression():
+
+        node = Parser.parseExpression()
+
+        while((Parser.tokens.actual.type == "lesser" or Parser.tokens.actual.type == "greater" or Parser.tokens.actual.type == "compare")):
+
+            if(Parser.tokens.actual.type == "lesser"):
+                Parser.tokens.selectNext()
+                node = BinOp('<', [node, Parser.parseExpression()])
+
+            elif(Parser.tokens.actual.type == "greater"):
+                Parser.tokens.selectNext()
+                node = BinOp('>', [node, Parser.parseExpression()])
+
+            elif(Parser.tokens.actual.type == "compare"):
+                Parser.tokens.selectNext()
+                node = BinOp('==', [node, Parser.parseExpression()])
+
         return node
 
     def run(code):
         # receve o codigo fonte como argumento, inicializa um objeto tokenizador e
         # retorna o resultado do parse expression(). Esse metodo sera chamado pelo main()
+
         f = open(code, "r")
         code = f.read()
         f.close()
