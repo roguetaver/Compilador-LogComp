@@ -1,6 +1,7 @@
 import sys
 import re
 
+
 class SymbolTable:
     symbolTableDict = {}
 
@@ -9,7 +10,8 @@ class SymbolTable:
         if(identifierName in SymbolTable.symbolTableDict.keys()):
             return SymbolTable.symbolTableDict.get(identifierName)
         else:
-            raise ValueError("Symbol Table ERROR - Identifier not in symbol table")
+            raise ValueError(
+                "Symbol Table ERROR - Identifier not in symbol table")
 
     def setIdentifier(identifierName, value):
         SymbolTable.symbolTableDict[identifierName] = value
@@ -41,14 +43,30 @@ class BinOp(Node):
     def Evaluate(self):
         if(self.value == "+"):
             return self.children[0].Evaluate() + self.children[1].Evaluate()
+
         elif (self.value == "-"):
             return self.children[0].Evaluate() - self.children[1].Evaluate()
+
         elif (self.value == "*"):
             return self.children[0].Evaluate() * self.children[1].Evaluate()
+
         elif (self.value == "/"):
             return self.children[0].Evaluate() // self.children[1].Evaluate()
-        elif (self.value == "="):
-            SymbolTable.setIdentifier(self.children[0].value, self.children[1].Evaluate())
+
+        elif (self.value == "<"):
+            return self.children[0].Evaluate() < self.children[1].Evaluate()
+
+        elif (self.value == ">"):
+            return self.children[0].Evaluate() > self.children[1].Evaluate()
+
+        elif (self.value == "=="):
+            return self.children[0].Evaluate() == self.children[1].Evaluate()
+
+        elif (self.value == "&&"):
+            return self.children[0].Evaluate() and self.children[1].Evaluate()
+
+        elif (self.value == "||"):
+            return self.children[0].Evaluate() or self.children[1].Evaluate()
 
 
 class UnOp(Node):
@@ -58,6 +76,14 @@ class UnOp(Node):
             return self.children[0].Evaluate()
         elif (self.value == "-"):
             return -self.children[0].Evaluate()
+        elif (self.value == "!"):
+            return not(self.children[0].Evaluate())
+
+
+class AssignOp(Node):
+
+    def Evaluate(self):
+        return SymbolTable.setIdentifier(self.children[0].value, self.children[1].Evaluate())
 
 
 class IntVal(Node):
@@ -83,6 +109,14 @@ class Printf(Node):
     def Evaluate(self):
         print(self.children[0].Evaluate())
 
+
+class Scanf(Node):
+
+    def Evaluate(self):
+        input_ = int(input())
+        return input_
+
+
 class Block(Node):
 
     def Evaluate(self):
@@ -90,9 +124,25 @@ class Block(Node):
             child.Evaluate()
 
 
+class While(Node):
+
+    def Evaluate(self):
+        while(self.children[0].Evaluate()):
+            self.children[1].Evaluate()
+
+
+class If(Node):
+
+    def Evaluate(self):
+        if(self.children[0].Evaluate()):
+            self.children[1].Evaluate()
+        elif(len(self.children) == 3):
+            self.children[2].Evaluate()
+
+
 class Tokenizer:
 
-    reservedWords = ["printf"]
+    reservedWords = ["printf", "if", "else", "while", "scanf"]
 
     def __init__(self, origin):
         self.origin = origin  # codigo fonte que sera tokenizado
@@ -161,6 +211,36 @@ class Tokenizer:
             self.actual = Token("semicolon", 0)
             return self.actual
 
+        elif(self.origin[self.position] == '<'):
+            self.position += 1
+            self.actual = Token("lesser", 0)
+            return self.actual
+
+        elif(self.origin[self.position] == '>'):
+            self.position += 1
+            self.actual = Token("greater", 0)
+            return self.actual
+
+        elif(self.origin[self.position] == '!'):
+            self.position += 1
+            self.actual = Token("not", 0)
+            return self.actual
+
+        elif(self.origin[self.position] == '=' and self.origin[self.position + 1] == '='):
+            self.position += 2
+            self.actual = Token("compare", 0)
+            return self.actual
+
+        elif(self.origin[self.position] == '&' and self.origin[self.position + 1] == '&'):
+            self.position += 2
+            self.actual = Token("and", 0)
+            return self.actual
+
+        elif(self.origin[self.position] == '|' and self.origin[self.position + 1] == '|'):
+            self.position += 2
+            self.actual = Token("or", 0)
+            return self.actual
+
         elif(self.origin[self.position].isalpha()):
             candidato = self.origin[self.position]
             self.position += 1
@@ -171,9 +251,10 @@ class Tokenizer:
                     if(self.position >= len(self.origin)):
                         break
             if(candidato in Tokenizer.reservedWords):
-                self.actual = Token(candidato, candidato)
+                self.actual = Token(candidato, 0)
             else:
                 self.actual = Token("identifier", candidato)
+                SymbolTable.setIdentifier(candidato, 0)
 
             return self.actual
 
@@ -190,7 +271,7 @@ class Tokenizer:
             return self.actual
 
         else:
-            raise ValueError("Tokenizer ERROR - token not found")
+            raise ValueError("ERROR")
 
 
 class Parser:
@@ -203,10 +284,11 @@ class Parser:
             Parser.tokens.selectNext()
             while (Parser.tokens.actual.type != "closeCurlyBrackets"):
                 children.append(Parser.parseStatement())
-            node = Block(0,children)
+            node = Block(0, children)
             Parser.tokens.selectNext()
         else:
-            raise ValueError("parseBlock ERROR - opened Curly Brackets token not found ")
+            raise ValueError(
+                "parseBlock ERROR - opened Curly Brackets token not found ")
         return node
 
     @staticmethod
@@ -216,14 +298,16 @@ class Parser:
             Parser.tokens.selectNext()
             if(Parser.tokens.actual.type == "assign"):
                 Parser.tokens.selectNext()
-                node = BinOp('=', [node, Parser.parseExpression()])
+                node = AssignOp('=', [node, Parser.parseExpression()])
                 if(Parser.tokens.actual.type == "semicolon"):
                     Parser.tokens.selectNext()
                 else:
-                    raise ValueError("parseStatement ERROR - semicolon token not found")
+                    raise ValueError(
+                        "parseStatement ERROR - semicolon token not found")
             else:
-                raise ValueError("parseStatement ERROR - assign token not found")
-        
+                raise ValueError(
+                    "parseStatement ERROR - assign token not found")
+
         elif(Parser.tokens.actual.type == "printf"):
 
             Parser.tokens.selectNext()
@@ -235,21 +319,23 @@ class Parser:
                     if(Parser.tokens.actual.type == "semicolon"):
                         Parser.tokens.selectNext()
                     else:
-                        raise ValueError("parseStatement ERROR - semicolon token not found")
+                        raise ValueError(
+                            "parseStatement ERROR - semicolon token not found")
                 else:
-                    raise ValueError("parseStatement ERROR - closed Parentheses token not found")
+                    raise ValueError(
+                        "parseStatement ERROR - closed Parentheses token not found")
             else:
-                raise ValueError("parseStatement ERROR - opened Parentheses token not found")
-        
+                raise ValueError(
+                    "parseStatement ERROR - opened Parentheses token not found")
+
         elif(Parser.tokens.actual.type == "semicolon"):
-            node = NoOp(0,[])
+            node = NoOp(0, [])
             Parser.tokens.selectNext()
-        
+
         else:
             raise ValueError("parseStatement ERROR - token not found")
 
         return node
-         
 
     @staticmethod
     def parseFactor():
@@ -258,7 +344,7 @@ class Parser:
         if(Parser.tokens.actual.type == "numeric"):
             node = IntVal(Parser.tokens.actual.value, [])
             Parser.tokens.selectNext()
-        
+
         elif(Parser.tokens.actual.type == "identifier"):
             node = Identifier(Parser.tokens.actual.value, [])
             Parser.tokens.selectNext()
@@ -277,7 +363,8 @@ class Parser:
             if(Parser.tokens.actual.type == "closeParentheses"):
                 Parser.tokens.selectNext()
             else:
-                raise ValueError("parseFactor ERROR - closed Parentheses token not found")
+                raise ValueError(
+                    "parseFactor ERROR - closed Parentheses token not found")
 
         else:
             raise ValueError("parseFactor ERROR - token not found")
