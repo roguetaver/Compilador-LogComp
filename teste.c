@@ -27,6 +27,10 @@
 
     stringB = "gsags";
 
+    stringC = stringA . stringB;
+
+    printf(stringC)
+
     if (stringB == stringA)
     {
         printf(stringB);
