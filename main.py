@@ -17,18 +17,20 @@ class SymbolTable:
     @staticmethod
     def setIdentifier(identifierName, value):
         if(identifierName in SymbolTable.symbolTableDict.keys()):
-            SymbolTable.symbolTableDict[identifierName] = (value , SymbolTable.symbolTableDict[identifierName][1])
+            SymbolTable.symbolTableDict[identifierName] = (
+                value, SymbolTable.symbolTableDict[identifierName][1])
         else:
             raise ValueError(
                 "Symbol Table ERROR - Identifier not in symbol table")
-    
+
     @staticmethod
     def createIdentifier(identifierName, type):
         if(identifierName in SymbolTable.symbolTableDict.keys()):
             raise ValueError(
                 "Symbol Table ERROR - Identifier already in symbol table")
         else:
-            SymbolTable.symbolTableDict[identifierName] = (None , type)
+            SymbolTable.symbolTableDict[identifierName] = (None, type)
+
 
 class Token:
     def __init__(self, type, value):
@@ -57,51 +59,50 @@ class BinOp(Node):
         if (self.children[0].Evaluate()[1] == "str" and self.children[1].Evaluate()[1] == "str"):
 
             if (self.value == "=="):
-                return ( self.children[0].Evaluate()[0] == self.children[1].Evaluate()[0] , "str")
+                return (self.children[0].Evaluate()[0] == self.children[1].Evaluate()[0], "str")
 
             elif (self.value == "."):
-                return ( self.children[0].Evaluate()[0] + self.children[1].Evaluate()[0] , "str")
+                return (self.children[0].Evaluate()[0] + self.children[1].Evaluate()[0], "str")
 
-        
         elif (self.children[0].Evaluate()[1] != "str" and self.children[1].Evaluate()[1] != "str"):
 
             if(self.value == "+"):
-                return ( self.children[0].Evaluate()[0] + self.children[1].Evaluate()[0] , "int" )
+                return (self.children[0].Evaluate()[0] + self.children[1].Evaluate()[0], "int")
 
-            elif (self.value == "-"): 
-                return ( self.children[0].Evaluate()[0] - self.children[1].Evaluate()[0] , "int" )
+            elif (self.value == "-"):
+                return (self.children[0].Evaluate()[0] - self.children[1].Evaluate()[0], "int")
 
             elif (self.value == "*"):
-                return ( self.children[0].Evaluate()[0] * self.children[1].Evaluate()[0] , "int" )
+                return (self.children[0].Evaluate()[0] * self.children[1].Evaluate()[0], "int")
 
             elif (self.value == "/"):
-                return ( self.children[0].Evaluate()[0] // self.children[1].Evaluate()[0] , "int" )
+                return (self.children[0].Evaluate()[0] // self.children[1].Evaluate()[0], "int")
 
             elif (self.value == "<"):
-                return ( self.children[0].Evaluate()[0] < self.children[1].Evaluate()[0] , "int" )
+                return (self.children[0].Evaluate()[0] < self.children[1].Evaluate()[0], "int")
 
             elif (self.value == ">"):
-                return ( self.children[0].Evaluate()[0] > self.children[1].Evaluate()[0] , "int" )
+                return (self.children[0].Evaluate()[0] > self.children[1].Evaluate()[0], "int")
 
             elif (self.value == "=="):
-                return ( self.children[0].Evaluate()[0] == self.children[1].Evaluate()[0] , "int" )
+                return (self.children[0].Evaluate()[0] == self.children[1].Evaluate()[0], "int")
 
             elif (self.value == "&&"):
-                return ( self.children[0].Evaluate()[0] and self.children[1].Evaluate()[0] , "int" )
+                return (self.children[0].Evaluate()[0] and self.children[1].Evaluate()[0], "int")
 
             elif (self.value == "||"):
-                return ( self.children[0].Evaluate()[0] or self.children[1].Evaluate()[0] , "int" )
+                return (self.children[0].Evaluate()[0] or self.children[1].Evaluate()[0], "int")
 
 
 class UnOp(Node):
 
     def Evaluate(self):
         if(self.value == "+"):
-            return ( self.children[0].Evaluate()[0] , "int" )
+            return (self.children[0].Evaluate()[0], "int")
         elif (self.value == "-"):
-            return ( -self.children[0].Evaluate()[0] , "int" )
+            return (-self.children[0].Evaluate()[0], "int")
         elif (self.value == "!"):
-            return ( not(self.children[0].Evaluate()[0]) , "int" )
+            return (not(self.children[0].Evaluate()[0]), "int")
 
 
 class AssignOp(Node):
@@ -109,6 +110,7 @@ class AssignOp(Node):
     def Evaluate(self):
         for child in self.children:
             SymbolTable.createIdentifier(child.value, self.value)
+
 
 class SetOp(Node):
 
@@ -124,12 +126,14 @@ class SetOp(Node):
 class IntVal(Node):
 
     def Evaluate(self):
-        return ( self.value , "int")
+        return (self.value, "int")
+
 
 class StrVal(Node):
 
     def Evaluate(self):
-        return ( self.value , "str" )
+        return (self.value, "str")
+
 
 class NoOp(Node):
 
@@ -153,7 +157,7 @@ class Scanf(Node):
 
     def Evaluate(self):
         input_ = int(input())
-        return ( input_ , "int")
+        return (input_, "int")
 
 
 class Block(Node):
@@ -269,7 +273,7 @@ class Tokenizer:
             self.position += 1
             self.actual = Token("assign", 0)
             return self.actual
-        
+
         elif(self.origin[self.position] == '.'):
             self.position += 1
             self.actual = Token("concat", 0)
@@ -288,6 +292,16 @@ class Tokenizer:
         elif(self.origin[self.position] == '|' and self.origin[self.position + 1] == '|'):
             self.position += 2
             self.actual = Token("or", 0)
+            return self.actual
+
+        elif self.origin[self.position] == '"':
+            self.position += 1
+            candidato = self.origin[self.position]
+            while self.position < len(self.origin) and (self.origin[self.position] != '"'):
+                candidato += self.origin[self.position]
+                self.position += 1
+            self.position += 1
+            self.actual = Token("str", candidato)
             return self.actual
 
         elif(self.origin[self.position].isalpha()):
@@ -386,7 +400,7 @@ class Parser:
 
         elif(Parser.tokens.actual.type == "openCurlyBrackets"):
             node = Parser.parseBlock()
-        
+
         elif(Parser.tokens.actual.type == "str" or Parser.tokens.actual.type == "int"):
 
             nodes = []
@@ -409,15 +423,14 @@ class Parser:
                             "parseStatement ERROR - identifier token not found")
                 if(Parser.tokens.actual.type == "semicolon"):
                     Parser.tokens.selectNext()
-                    return AssignOp( actualType , nodes)
+                    return AssignOp(actualType, nodes)
                 else:
                     raise ValueError(
                         "parseStatement ERROR - semicolon token not found")
 
             else:
-               raise ValueError(
-                    "parseStatement ERROR - identifier token not found") 
-                
+                raise ValueError(
+                    "parseStatement ERROR - identifier token not found")
 
         elif Parser.tokens.actual.type == "while":
             Parser.tokens.selectNext()
@@ -478,11 +491,11 @@ class Parser:
     def parseFactor():
         # consome os tokens do tokenizer e analisa se a sintaze esta aderente
         # a gramatica proposta retorna o resultado da expressão analisada
-        
+
         if(Parser.tokens.actual.type == "int"):
             node = IntVal(Parser.tokens.actual.value, [])
             Parser.tokens.selectNext()
-        
+
         elif(Parser.tokens.actual.type == "str"):
             node = StrVal(Parser.tokens.actual.value, [])
             Parser.tokens.selectNext()

@@ -21,9 +21,14 @@
     }
     printf(x5);
 
-    str abab;
+    str stringA, stringB, stringC;
 
-    abab = "gsags";
+    stringA = "gsags";
 
-    printf(abab);
+    stringB = "gsags";
+
+    if (stringB == stringA)
+    {
+        printf(stringB);
+    }
 }
