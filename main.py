@@ -1,3 +1,4 @@
+from ast import Assign
 import sys
 import re
 
@@ -13,9 +14,21 @@ class SymbolTable:
             raise ValueError(
                 "Symbol Table ERROR - Identifier not in symbol table")
 
+    @staticmethod
     def setIdentifier(identifierName, value):
-        SymbolTable.symbolTableDict[identifierName] = value
-
+        if(identifierName in SymbolTable.symbolTableDict.keys()):
+            SymbolTable.symbolTableDict[identifierName] = (value , SymbolTable.symbolTableDict[identifierName][1])
+        else:
+            raise ValueError(
+                "Symbol Table ERROR - Identifier not in symbol table")
+    
+    @staticmethod
+    def createIdentifier(identifierName, type):
+        if(identifierName in SymbolTable.symbolTableDict.keys()):
+            raise ValueError(
+                "Symbol Table ERROR - Identifier already in symbol table")
+        else:
+            SymbolTable.symbolTableDict[identifierName] = (None , type)
 
 class Token:
     def __init__(self, type, value):
@@ -41,57 +54,82 @@ class Node:
 class BinOp(Node):
 
     def Evaluate(self):
-        if(self.value == "+"):
-            return self.children[0].Evaluate() + self.children[1].Evaluate()
+        if (self.children[0].Evaluate()[1] == "str" and self.children[1].Evaluate()[1] == "str"):
 
-        elif (self.value == "-"):
-            return self.children[0].Evaluate() - self.children[1].Evaluate()
+            if (self.value == "=="):
+                return ( self.children[0].Evaluate()[0] == self.children[1].Evaluate()[0] , "str")
 
-        elif (self.value == "*"):
-            return self.children[0].Evaluate() * self.children[1].Evaluate()
+            elif (self.value == "."):
+                return ( self.children[0].Evaluate()[0] + self.children[1].Evaluate()[0] , "str")
 
-        elif (self.value == "/"):
-            return self.children[0].Evaluate() // self.children[1].Evaluate()
+        
+        elif (self.children[0].Evaluate()[1] != "str" and self.children[1].Evaluate()[1] != "str"):
 
-        elif (self.value == "<"):
-            return self.children[0].Evaluate() < self.children[1].Evaluate()
+            if(self.value == "+"):
+                return ( self.children[0].Evaluate()[0] + self.children[1].Evaluate()[0] , "int" )
 
-        elif (self.value == ">"):
-            return self.children[0].Evaluate() > self.children[1].Evaluate()
+            elif (self.value == "-"): 
+                return ( self.children[0].Evaluate()[0] - self.children[1].Evaluate()[0] , "int" )
 
-        elif (self.value == "=="):
-            return self.children[0].Evaluate() == self.children[1].Evaluate()
+            elif (self.value == "*"):
+                return ( self.children[0].Evaluate()[0] * self.children[1].Evaluate()[0] , "int" )
 
-        elif (self.value == "&&"):
-            return self.children[0].Evaluate() and self.children[1].Evaluate()
+            elif (self.value == "/"):
+                return ( self.children[0].Evaluate()[0] // self.children[1].Evaluate()[0] , "int" )
 
-        elif (self.value == "||"):
-            return self.children[0].Evaluate() or self.children[1].Evaluate()
+            elif (self.value == "<"):
+                return ( self.children[0].Evaluate()[0] < self.children[1].Evaluate()[0] , "int" )
+
+            elif (self.value == ">"):
+                return ( self.children[0].Evaluate()[0] > self.children[1].Evaluate()[0] , "int" )
+
+            elif (self.value == "=="):
+                return ( self.children[0].Evaluate()[0] == self.children[1].Evaluate()[0] , "int" )
+
+            elif (self.value == "&&"):
+                return ( self.children[0].Evaluate()[0] and self.children[1].Evaluate()[0] , "int" )
+
+            elif (self.value == "||"):
+                return ( self.children[0].Evaluate()[0] or self.children[1].Evaluate()[0] , "int" )
 
 
 class UnOp(Node):
 
     def Evaluate(self):
         if(self.value == "+"):
-            return self.children[0].Evaluate()
+            return ( self.children[0].Evaluate()[0] , "int" )
         elif (self.value == "-"):
-            return -self.children[0].Evaluate()
+            return ( -self.children[0].Evaluate()[0] , "int" )
         elif (self.value == "!"):
-            return not(self.children[0].Evaluate())
+            return ( not(self.children[0].Evaluate()[0]) , "int" )
 
 
 class AssignOp(Node):
 
     def Evaluate(self):
-        SymbolTable.setIdentifier(
-            self.children[0].value, self.children[1].Evaluate())
+        for child in self.children:
+            SymbolTable.createIdentifier(child.value, self.value)
+
+class SetOp(Node):
+
+    def Evaluate(self):
+        if self.children[0].value in SymbolTable.symbolTableDict.keys():
+            SymbolTable.setIdentifier(
+                self.children[0].value, self.children[1].Evaluate()[0])
+        else:
+            raise ValueError(
+                "Symbol Table ERROR - Identifier not in symbol table")
 
 
 class IntVal(Node):
 
     def Evaluate(self):
-        return self.value
+        return ( self.value , "int")
 
+class StrVal(Node):
+
+    def Evaluate(self):
+        return ( self.value , "str" )
 
 class NoOp(Node):
 
@@ -108,14 +146,14 @@ class Identifier(Node):
 class Printf(Node):
 
     def Evaluate(self):
-        print(self.children[0].Evaluate())
+        print(self.children[0].Evaluate()[0])
 
 
 class Scanf(Node):
 
     def Evaluate(self):
         input_ = int(input())
-        return input_
+        return ( input_ , "int")
 
 
 class Block(Node):
@@ -128,14 +166,14 @@ class Block(Node):
 class While(Node):
 
     def Evaluate(self):
-        while(self.children[0].Evaluate()):
+        while(self.children[0].Evaluate()[0]):
             self.children[1].Evaluate()
 
 
 class If(Node):
 
     def Evaluate(self):
-        if(self.children[0].Evaluate()):
+        if(self.children[0].Evaluate()[0]):
             self.children[1].Evaluate()
         elif(len(self.children) == 3):
             self.children[2].Evaluate()
@@ -143,7 +181,7 @@ class If(Node):
 
 class Tokenizer:
 
-    reservedWords = ["printf", "if", "else", "while", "scanf"]
+    reservedWords = ["printf", "if", "else", "while", "scanf", "int", "str"]
 
     def __init__(self, origin):
         self.origin = origin  # codigo fonte que sera tokenizado
@@ -231,6 +269,16 @@ class Tokenizer:
             self.position += 1
             self.actual = Token("assign", 0)
             return self.actual
+        
+        elif(self.origin[self.position] == '.'):
+            self.position += 1
+            self.actual = Token("concat", 0)
+            return self.actual
+
+        elif(self.origin[self.position] == ','):
+            self.position += 1
+            self.actual = Token("comma", 0)
+            return self.actual
 
         elif(self.origin[self.position] == '&' and self.origin[self.position + 1] == '&'):
             self.position += 2
@@ -267,7 +315,7 @@ class Tokenizer:
                     self.position += 1
                     if(self.position >= len(self.origin)):
                         break
-            self.actual = Token("numeric", int(candidato))
+            self.actual = Token("int", int(candidato))
             return self.actual
 
         else:
@@ -302,7 +350,7 @@ class Parser:
             if(Parser.tokens.actual.type == "assign"):
 
                 Parser.tokens.selectNext()
-                node = AssignOp('=', [node, Parser.parseRelExpression()])
+                node = SetOp('=', [node, Parser.parseRelExpression()])
 
                 if(Parser.tokens.actual.type == "semicolon"):
                     Parser.tokens.selectNext()
@@ -338,6 +386,38 @@ class Parser:
 
         elif(Parser.tokens.actual.type == "openCurlyBrackets"):
             node = Parser.parseBlock()
+        
+        elif(Parser.tokens.actual.type == "str" or Parser.tokens.actual.type == "int"):
+
+            nodes = []
+            actualType = Parser.tokens.actual.type
+            Parser.tokens.selectNext()
+
+            if(Parser.tokens.actual.type == "identifier"):
+
+                nodes.append(Parser.tokens.actual)
+                Parser.tokens.selectNext()
+
+                while(Parser.tokens.actual.type == "comma"):
+                    Parser.tokens.selectNext()
+
+                    if(Parser.tokens.actual.type == "identifier"):
+                        nodes.append(Parser.tokens.actual)
+                        Parser.tokens.selectNext()
+                    else:
+                        raise ValueError(
+                            "parseStatement ERROR - identifier token not found")
+                if(Parser.tokens.actual.type == "semicolon"):
+                    Parser.tokens.selectNext()
+                    return AssignOp( actualType , nodes)
+                else:
+                    raise ValueError(
+                        "parseStatement ERROR - semicolon token not found")
+
+            else:
+               raise ValueError(
+                    "parseStatement ERROR - identifier token not found") 
+                
 
         elif Parser.tokens.actual.type == "while":
             Parser.tokens.selectNext()
@@ -398,9 +478,13 @@ class Parser:
     def parseFactor():
         # consome os tokens do tokenizer e analisa se a sintaze esta aderente
         # a gramatica proposta retorna o resultado da expressão analisada
-
-        if(Parser.tokens.actual.type == "numeric"):
+        
+        if(Parser.tokens.actual.type == "int"):
             node = IntVal(Parser.tokens.actual.value, [])
+            Parser.tokens.selectNext()
+        
+        elif(Parser.tokens.actual.type == "str"):
+            node = StrVal(Parser.tokens.actual.value, [])
             Parser.tokens.selectNext()
 
         elif(Parser.tokens.actual.type == "identifier"):
@@ -489,6 +573,10 @@ class Parser:
             elif(Parser.tokens.actual.type == "or"):
                 Parser.tokens.selectNext()
                 node = BinOp('||', [node, Parser.parseTerm()])
+
+            elif(Parser.tokens.actual.type == "concat"):
+                Parser.tokens.selectNext()
+                node = BinOp('.', [node, Parser.parseTerm()])
 
         return node
 
