@@ -56,6 +56,7 @@ class Node:
 class BinOp(Node):
 
     def Evaluate(self):
+        
         if (self.children[0].Evaluate()[1] == "str" and self.children[1].Evaluate()[1] == "str"):
 
             if (self.value == "=="):
@@ -75,6 +76,14 @@ class BinOp(Node):
                     return(1,"int")
                 else:
                     return(0,"int")
+        
+        elif (self.children[0].Evaluate()[1] == "str" and self.children[1].Evaluate()[1] != "str"):
+            if (self.value == "."):
+                return (self.children[0].Evaluate()[0] + str(self.children[1].Evaluate()[0]), "str")
+
+        elif (self.children[0].Evaluate()[1] != "str" and self.children[1].Evaluate()[1] == "str"):
+            if (self.value == "."):
+                return (str(self.children[0].Evaluate()[0]) + self.children[1].Evaluate()[0], "str")
 
         elif (self.children[0].Evaluate()[1] != "str" and self.children[1].Evaluate()[1] != "str"):
 
