@@ -63,6 +63,18 @@ class BinOp(Node):
 
             elif (self.value == "."):
                 return (self.children[0].Evaluate()[0] + self.children[1].Evaluate()[0], "str")
+            
+            elif (self.value == "<"):
+                if(len(self.children[0].Evaluate()[0]) < len(self.children[1].Evaluate()[0])):
+                    return(1,"str")
+                else:
+                    return(0,"str")
+
+            elif (self.value == ">"):
+                if(len(self.children[0].Evaluate()[0]) > len(self.children[1].Evaluate()[0])):
+                    return(1,"int")
+                else:
+                    return(0,"int")
 
         elif (self.children[0].Evaluate()[1] != "str" and self.children[1].Evaluate()[1] != "str"):
 
@@ -79,19 +91,34 @@ class BinOp(Node):
                 return (self.children[0].Evaluate()[0] // self.children[1].Evaluate()[0], "int")
 
             elif (self.value == "<"):
-                return (self.children[0].Evaluate()[0] < self.children[1].Evaluate()[0], "int")
+                if(self.children[0].Evaluate()[0] < self.children[1].Evaluate()[0]):
+                    return(1,"int")
+                else:
+                    return(0,"int")
 
             elif (self.value == ">"):
-                return (self.children[0].Evaluate()[0] > self.children[1].Evaluate()[0], "int")
+                if(self.children[0].Evaluate()[0] > self.children[1].Evaluate()[0]):
+                    return(1,"int")
+                else:
+                    return(0,"int")
 
             elif (self.value == "=="):
-                return (self.children[0].Evaluate()[0] == self.children[1].Evaluate()[0], "int")
+                if(self.children[0].Evaluate()[0] == self.children[1].Evaluate()[0]):
+                    return(1,"int")
+                else:
+                    return(0,"int")
 
             elif (self.value == "&&"):
-                return (self.children[0].Evaluate()[0] and self.children[1].Evaluate()[0], "int")
+                if(self.children[0].Evaluate()[0] and self.children[1].Evaluate()[0]):
+                    return(1,"int")
+                else:
+                    return(0,"int")
 
             elif (self.value == "||"):
-                return (self.children[0].Evaluate()[0] or self.children[1].Evaluate()[0], "int")
+                if(self.children[0].Evaluate()[0] or self.children[1].Evaluate()[0]):
+                    return(1,"int")
+                else:
+                    return(0,"int")
 
 
 class UnOp(Node):
