@@ -83,14 +83,10 @@ class BinOp(Node):
         elif (self.children[0].Evaluate()[1] == "str" and self.children[1].Evaluate()[1] != "str"):
             if (self.value == "."):
                 return (self.children[0].Evaluate()[0] + str(self.children[1].Evaluate()[0]), "str")
-            elif (self.value == "=="):
-                return (self.children[0].Evaluate()[0] == str(self.children[1].Evaluate()[0]), "str")
 
         elif (self.children[0].Evaluate()[1] != "str" and self.children[1].Evaluate()[1] == "str"):
             if (self.value == "."):
                 return (str(self.children[0].Evaluate()[0]) + self.children[1].Evaluate()[0], "str")
-            elif (self.value == "=="):
-                return ( str(self.children[0].Evaluate()[0]) == self.children[1].Evaluate()[0], "str")
 
         elif (self.children[0].Evaluate()[1] != "str" and self.children[1].Evaluate()[1] != "str"):
 
