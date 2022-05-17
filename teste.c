@@ -1,38 +1,19 @@
+
 {
+  /* All str operations */
+  str a, b;
+  int x_1, y, z;
+  x_1 = 1; y = 1; z = 2;
+  a = "abc";
+  b = "def";
+  printf("b");
+  printf(a.b);
+  printf(a.x_1);
+  printf(x_1.a);
+  printf(y.z);
+  printf(a.(x_1==1));
+  printf(a == a);
+  printf(a < b);
+  printf(a > b);
 
-    int x1, x2, x3, x4, x5;
-
-    x1 = scanf();
-
-    x2 = scanf();
-
-    x2 = x1 + x2;
-
-    if (x1 == x2)
-    {
-        printf(x2);
-    }
-
-    x5 = 0;
-
-    while (x5 < 5)
-    {
-        x5 = x5 + 1;
-    }
-    printf(x5);
-
-    str stringA, stringB, stringC;
-
-    stringA = "gsags";
-
-    stringB = "gsags";
-
-    stringC = stringA . stringB;
-
-    printf(stringC);
-
-    if (stringB == stringA)
-    {
-        printf(stringB);
-    }
 }

@@ -56,11 +56,14 @@ class Node:
 class BinOp(Node):
 
     def Evaluate(self):
-        
+
         if (self.children[0].Evaluate()[1] == "str" and self.children[1].Evaluate()[1] == "str"):
 
             if (self.value == "=="):
-                return (self.children[0].Evaluate()[0] == self.children[1].Evaluate()[0], "str")
+                if(len(self.children[0].Evaluate()[0]) == len(self.children[1].Evaluate()[0])):
+                    return(1,"str")
+                else:
+                    return(0,"str")
 
             elif (self.value == "."):
                 return (self.children[0].Evaluate()[0] + self.children[1].Evaluate()[0], "str")
@@ -80,10 +83,14 @@ class BinOp(Node):
         elif (self.children[0].Evaluate()[1] == "str" and self.children[1].Evaluate()[1] != "str"):
             if (self.value == "."):
                 return (self.children[0].Evaluate()[0] + str(self.children[1].Evaluate()[0]), "str")
+            elif (self.value == "=="):
+                return (self.children[0].Evaluate()[0] == str(self.children[1].Evaluate()[0]), "str")
 
         elif (self.children[0].Evaluate()[1] != "str" and self.children[1].Evaluate()[1] == "str"):
             if (self.value == "."):
                 return (str(self.children[0].Evaluate()[0]) + self.children[1].Evaluate()[0], "str")
+            elif (self.value == "=="):
+                return ( str(self.children[0].Evaluate()[0]) == self.children[1].Evaluate()[0], "str")
 
         elif (self.children[0].Evaluate()[1] != "str" and self.children[1].Evaluate()[1] != "str"):
 
@@ -128,6 +135,9 @@ class BinOp(Node):
                     return(1,"int")
                 else:
                     return(0,"int")
+
+            elif (self.value == "."):
+                return (str(self.children[0].Evaluate()[0]) + str(self.children[1].Evaluate()[0]), "str")
 
 
 class UnOp(Node):
@@ -333,6 +343,7 @@ class Tokenizer:
         elif self.origin[self.position] == '"':
             self.position += 1
             candidato = self.origin[self.position]
+            self.position += 1
             while self.position < len(self.origin) and (self.origin[self.position] != '"'):
                 candidato += self.origin[self.position]
                 self.position += 1
