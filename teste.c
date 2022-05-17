@@ -29,7 +29,7 @@
 
     stringC = stringA . stringB;
 
-    printf(stringC)
+    printf(stringC);
 
     if (stringB == stringA)
     {
