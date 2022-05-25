@@ -103,7 +103,7 @@ class SymbolTable:
             if(SymbolTable.symbolTableDict[identifierName][1] == "str" and type(value) == str
             or SymbolTable.symbolTableDict[identifierName][1] == "int" and str(value).isnumeric()):
                 SymbolTable.symbolTableDict[identifierName] = (
-                    value, SymbolTable.symbolTableDict[identifierName][1],SymbolTable.pointer)
+                    value, SymbolTable.symbolTableDict[identifierName][1],SymbolTable.symbolTableDict[identifierName][2])
         else:
             raise ValueError(
                 "Symbol Table ERROR - Identifier not in symbol table")
@@ -152,7 +152,6 @@ class Node:
     def __init__(self, value, children):
         self.value = value
         self.children = children
-        self.idLocal = Node.newId()
 
     def Evaluate(self):
         pass
@@ -167,72 +166,68 @@ class BinOp(Node):
 
     def Evaluate(self):
 
+        left = self.children[0].Evaluate()
         ASM.Write(f'PUSH EBX')
+        right = self.children[1].Evaluate()
         ASM.Write(f'POP EAX')
 
-        if (self.children[0].Evaluate()[1] == "str" and self.children[1].Evaluate()[1] == "str"):
+        if (left[1] == "str" and right[1] == "str"):
 
             if (self.value == "=="):
-                if(self.children[0].Evaluate()[0] == self.children[1].Evaluate()[0]):
-                    ASM.Write("CMP EAX, EBX ;")
-                    ASM.Write("CALL binop_je ;")
+                if(left[0] == right[0]):
                     return(1,"str")
                 else:
                     return(0,"str")
 
             elif (self.value == "."):
-                return (self.children[0].Evaluate()[0] + self.children[1].Evaluate()[0], "str")
+                return (left[0] + right[0], "str")
             
             elif (self.value == "<"):
-                ASM.Write(f"CMP EAX, EBX")
-                ASM.Write(f"CALL binop_jl")
-                if(self.children[0].Evaluate()[0] < self.children[1].Evaluate()[0]):
+                if(left[0] < right[0]):
                     return(1,"str")
                 else:
                     return(0,"str")
 
             elif (self.value == ">"):
-                ASM.Write(f"CMP EAX, EBX")
-                ASM.Write(f"CALL binop_jg")
-                if(self.children[0].Evaluate()[0] > self.children[1].Evaluate()[0]):
+                if(left[0] > right[0]):
                     return(1,"str")
                 else:
                     return(0,"str")
         
-        elif (self.children[0].Evaluate()[1] == "str" and self.children[1].Evaluate()[1] != "str"):
+        elif (left[1] == "str" and right[1] != "str"):
             if (self.value == "."):
-                return (self.children[0].Evaluate()[0] + str(self.children[1].Evaluate()[0]), "str")
+                return (left[0] + str(right[0]), "str")
 
-        elif (self.children[0].Evaluate()[1] != "str" and self.children[1].Evaluate()[1] == "str"):
+        elif (left[1] != "str" and right[1] == "str"):
             if (self.value == "."):
-                return (str(self.children[0].Evaluate()[0]) + self.children[1].Evaluate()[0], "str")
+                return (str(left[0]) + right[0], "str")
 
-        elif (self.children[0].Evaluate()[1] != "str" and self.children[1].Evaluate()[1] != "str"):
+        elif (left[1] != "str" and right[1] != "str"):
 
             if(self.value == "+"):
                 ASM.Write(f"ADD EAX, EBX")
                 ASM.Write(f"MOV EBX, EAX")
-                return (self.children[0].Evaluate()[0] + self.children[1].Evaluate()[0], "int")
+                return (left[0] + right[0], "int")
 
             elif (self.value == "-"):
                 ASM.Write(f'SUB EAX, EBX')
                 ASM.Write(f'MOV EBX, EAX')
-                return (self.children[0].Evaluate()[0] - self.children[1].Evaluate()[0], "int")
+                return (left[0] - right[0], "int")
 
             elif (self.value == "*"):
                 ASM.Write(f'IMUL EAX, EBX')
                 ASM.Write(f'MOV EBX, EAX')
-                return (self.children[0].Evaluate()[0] * self.children[1].Evaluate()[0], "int")
+                return (left[0] * right[0], "int")
 
             elif (self.value == "/"):
                 ASM.Write(f'IDIV EAX, EBX')
                 ASM.Write(f'MOV EBX, EAX')
-                return (self.children[0].Evaluate()[0] // self.children[1].Evaluate()[0], "int")
+                return (left[0] // right[0], "int")
 
             elif (self.value == "<"):
                 ASM.Write('CMP EAX, EBX')
                 ASM.Write('CALL binop_jl')
-                if(self.children[0].Evaluate()[0] < self.children[1].Evaluate()[0]):
+                if(left[0] < right[0]):
                     return(1,"int")
                 else:
                     return(0,"int")
@@ -240,7 +235,7 @@ class BinOp(Node):
             elif (self.value == ">"):
                 ASM.Write('CMP EAX, EBX')
                 ASM.Write('CALL binop_jg')
-                if(self.children[0].Evaluate()[0] > self.children[1].Evaluate()[0]):
+                if(left[0] > right[0]):
                     return(1,"int")
                 else:
                     return(0,"int")
@@ -248,7 +243,7 @@ class BinOp(Node):
             elif (self.value == "=="):
                 ASM.Write('CMP EAX, EBX')
                 ASM.Write('CALL binop_je')
-                if(self.children[0].Evaluate()[0] == self.children[1].Evaluate()[0]):
+                if(left[0] == right[0]):
                     return(1,"int")
                 else:
                     return(0,"int")
@@ -256,7 +251,7 @@ class BinOp(Node):
             elif (self.value == "&&"):
                 ASM.Write(f'AND EAX, EBX')
                 ASM.Write(f'MOV EBX, EAX')
-                if(self.children[0].Evaluate()[0] and self.children[1].Evaluate()[0]):
+                if(left[0] and right[0]):
                     return(1,"int")
                 else:
                     return(0,"int")
@@ -264,13 +259,13 @@ class BinOp(Node):
             elif (self.value == "||"):
                 ASM.Write(f'OR EAX, EBX')
                 ASM.Write(f'MOV EBX, EAX')
-                if(self.children[0].Evaluate()[0] or self.children[1].Evaluate()[0]):
+                if(left[0] or right[0]):
                     return(1,"int")
                 else:
                     return(0,"int")
 
             elif (self.value == "."):
-                return (str(self.children[0].Evaluate()[0]) + str(self.children[1].Evaluate()[0]), "str")
+                return (str(left[0]) + str(right[0]), "str")
 
 
 class UnOp(Node):
@@ -295,12 +290,11 @@ class AssignOp(Node):
 class SetOp(Node):
 
     def Evaluate(self):
-        if self.children[0].value in SymbolTable.symbolTableDict.keys():
-            SymbolTable.setIdentifier(self.children[0].value, self.children[1].Evaluate()[0])
-            ASM.Write(f'MOV [EBP-{SymbolTable.getIdentifier(self.children[0].value)[2]}], EBX')
-        else:
-            raise ValueError(
-                "Symbol Table ERROR - Identifier not in symbol table")
+        temp_set = self.children[1].Evaluate()[0]
+        ASM.Write(f'MOV [EBP-{SymbolTable.getIdentifier(self.children[0].value)[2]}], EBX')
+
+        SymbolTable.setIdentifier(self.children[0].value, temp_set )
+
 
 
 class IntVal(Node):
@@ -325,16 +319,18 @@ class NoOp(Node):
 class Identifier(Node):
 
     def Evaluate(self):
+        ASM.Write(f"MOV EBX, [EBP-{str(SymbolTable.getIdentifier(self.value)[2])}]")
         return SymbolTable.getIdentifier(self.value)
 
 
 class Printf(Node):
 
     def Evaluate(self):
+        temp_print = self.children[0].Evaluate()[0]
         ASM.Write('PUSH EBX')
         ASM.Write('CALL print')
         ASM.Write('POP EBX')
-        print(self.children[0].Evaluate()[0])
+        print(temp_print)
 
 
 class Scanf(Node):
@@ -354,25 +350,31 @@ class Block(Node):
 class While(Node):
 
     def Evaluate(self):
-        ASM.Write(f'LOOP_{self.idLocal}:')
+        temp_while = Node.newId()
+        ASM.Write(f'LOOP_{temp_while}:')
         self.children[0].Evaluate()
         ASM.Write('CMP EBX, False')
-        ASM.Write(f'JE EXIT_{self.idLocal}')
+        ASM.Write(f'JE EXIT_{temp_while}')
         self.children[1].Evaluate()
-        ASM.Write(f'JMP LOOP_{self.idLocal}')
-        ASM.Write(f'EXIT_{self.idLocal}:')
+        ASM.Write(f'JMP LOOP_{temp_while}')
+        ASM.Write(f'EXIT_{temp_while}:')
 
 
 class If(Node):
 
     def Evaluate(self):
+         
+        tmp_if = Node.newId()
+        ASM.write(f"IF_{tmp_if}:")
         self.children[0].Evaluate()
-        ASM.Write('CMP EBX, False')
-        ASM.Write(f'JE EXIT_{self.idLocal}')
+        ASM.write("CMP EBX, False")
+        ASM.write(f"JE ELSE_{tmp_if}") 
         self.children[1].Evaluate()
-        ASM.Write(f'EXIT_{self.idLocal}:')
-        if len(self.children) > 2:
+        ASM.write(f"JMP IF_END_{tmp_if}")
+        ASM.write(f"ELSE_{tmp_if}:")
+        if (len(self.children) > 2):
             self.children[2].Evaluate()
+        ASM.write(f"IF_END_{tmp_if}:")
 
 
 class Tokenizer:

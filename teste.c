@@ -1,17 +1,17 @@
 
 {
-  int a;
-  a = 2;
-  int b;
-  b = 3;
+  int i;
+  int n;
+  int f;
+  n = 5;
+  i = 2;
+  f = 1;
 
-  while(a < 6){
-    a = a + 1;
-    printf(b);
+  while(i < n + 1){
+    f = f * i;
+    i = i + 1;
   }
 
-  if(a > 3){
-    printf(a);
-  }
+  printf(f);
 
 }
