@@ -76,6 +76,9 @@ binop_exit:
   RET
 
 _start:
+
+PUSH EBP ; babababba
+MOV EBP, ESP ; PAPA JHONS
 PUSH DWORD 0
 PUSH DWORD 0
 PUSH DWORD 0
