@@ -365,16 +365,16 @@ class If(Node):
     def Evaluate(self):
          
         tmp_if = Node.newId()
-        ASM.write(f"IF_{tmp_if}:")
+        ASM.Write(f"IF_{tmp_if}:")
         self.children[0].Evaluate()
-        ASM.write("CMP EBX, False")
-        ASM.write(f"JE ELSE_{tmp_if}") 
+        ASM.Write("CMP EBX, False")
+        ASM.Write(f"JE ELSE_{tmp_if}") 
         self.children[1].Evaluate()
-        ASM.write(f"JMP IF_END_{tmp_if}")
-        ASM.write(f"ELSE_{tmp_if}:")
+        ASM.Write(f"JMP IF_END_{tmp_if}")
+        ASM.Write(f"ELSE_{tmp_if}:")
         if (len(self.children) > 2):
             self.children[2].Evaluate()
-        ASM.write(f"IF_END_{tmp_if}:")
+        ASM.Write(f"IF_END_{tmp_if}:")
 
 
 class Tokenizer:
