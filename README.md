@@ -7,8 +7,8 @@ Feito por André Tavernaro
 
 Roteiro 9 - ATUAL
 
-![Alt text](diagrama-roteiro9.jpeg?raw=true "Diagrama Sintático Roteiro 9")
-![Alt text](diagrama-roteiro9-2.jpeg?raw=true "Diagrama Sintático Roteiro 9")
+![Alt text](diagrama-roteiro9.jpg?raw=true "Diagrama Sintático Roteiro 9")
+![Alt text](diagrama-roteiro9-2.jpg?raw=true "Diagrama Sintático Roteiro 9")
 
 
 Roteiro 6 - OK
