@@ -4,7 +4,6 @@ import re
 class SymbolTable:
     symbolTableDict = {}
 
-    @staticmethod
     def getIdentifier(identifierName):
         if(identifierName in SymbolTable.symbolTableDict.keys()):
             return SymbolTable.symbolTableDict.get(identifierName)
@@ -12,16 +11,16 @@ class SymbolTable:
             raise ValueError(
                 "Symbol Table ERROR - Identifier not in symbol table")
 
-    @staticmethod
     def setIdentifier(identifierName, value):
         if(identifierName in SymbolTable.symbolTableDict.keys()):
-            SymbolTable.symbolTableDict[identifierName] = (
-                value, SymbolTable.symbolTableDict[identifierName][1])
+            if(SymbolTable.symbolTableDict[identifierName][1] == "str" and type(value) == str
+               or SymbolTable.symbolTableDict[identifierName][1] == "int" and str(value).isnumeric()):
+                SymbolTable.symbolTableDict[identifierName] = (
+                    value, SymbolTable.symbolTableDict[identifierName][1])
         else:
             raise ValueError(
                 "Symbol Table ERROR - Identifier not in symbol table")
 
-    @staticmethod
     def createIdentifier(identifierName, type):
         if(identifierName in SymbolTable.symbolTableDict.keys()):
             raise ValueError(
@@ -47,117 +46,117 @@ class Node:
         self.value = value
         self.children = children
 
-    def Evaluate(self):
+    def Evaluate():
         pass
 
 
 class BinOp(Node):
 
-    def Evaluate(self):
+    def Evaluate(self, symbolTable):
 
-        if (self.children[0].Evaluate()[1] == "str" and self.children[1].Evaluate()[1] == "str"):
+        if (self.children[0].Evaluate(symbolTable)[1] == "str" and self.children[1].Evaluate(symbolTable)[1] == "str"):
 
             if (self.value == "=="):
-                if(self.children[0].Evaluate()[0] == self.children[1].Evaluate()[0]):
+                if(self.children[0].Evaluate(symbolTable)[0] == self.children[1].Evaluate(symbolTable)[0]):
                     return(1,"str")
                 else:
                     return(0,"str")
 
             elif (self.value == "."):
-                return (self.children[0].Evaluate()[0] + self.children[1].Evaluate()[0], "str")
+                return (self.children[0].Evaluate(symbolTable)[0] + self.children[1].Evaluate(symbolTable)[0], "str")
             
             elif (self.value == "<"):
-                if(self.children[0].Evaluate()[0] < self.children[1].Evaluate()[0]):
+                if(self.children[0].Evaluate(symbolTable)[0] < self.children[1].Evaluate(symbolTable)[0]):
                     return(1,"str")
                 else:
                     return(0,"str")
 
             elif (self.value == ">"):
-                if(self.children[0].Evaluate()[0] > self.children[1].Evaluate()[0]):
+                if(self.children[0].Evaluate(symbolTable)[0] > self.children[1].Evaluate(symbolTable)[0]):
                     return(1,"str")
                 else:
                     return(0,"str")
         
-        elif (self.children[0].Evaluate()[1] == "str" and self.children[1].Evaluate()[1] != "str"):
+        elif (self.children[0].Evaluate(symbolTable)[1] == "str" and self.children[1].Evaluate(symbolTable)[1] != "str"):
             if (self.value == "."):
-                return (self.children[0].Evaluate()[0] + str(self.children[1].Evaluate()[0]), "str")
+                return (self.children[0].Evaluate(symbolTable)[0] + str(self.children[1].Evaluate(symbolTable)[0]), "str")
 
-        elif (self.children[0].Evaluate()[1] != "str" and self.children[1].Evaluate()[1] == "str"):
+        elif (self.children[0].Evaluate(symbolTable)[1] != "str" and self.children[1].Evaluate(symbolTable)[1] == "str"):
             if (self.value == "."):
-                return (str(self.children[0].Evaluate()[0]) + self.children[1].Evaluate()[0], "str")
+                return (str(self.children[0].Evaluate(symbolTable)[0]) + self.children[1].Evaluate(symbolTable)[0], "str")
 
-        elif (self.children[0].Evaluate()[1] != "str" and self.children[1].Evaluate()[1] != "str"):
+        elif (self.children[0].Evaluate(symbolTable)[1] != "str" and self.children[1].Evaluate(symbolTable)[1] != "str"):
 
             if(self.value == "+"):
-                return (self.children[0].Evaluate()[0] + self.children[1].Evaluate()[0], "int")
+                return (self.children[0].Evaluate(symbolTable)[0] + self.children[1].Evaluate(symbolTable)[0], "int")
 
             elif (self.value == "-"):
-                return (self.children[0].Evaluate()[0] - self.children[1].Evaluate()[0], "int")
+                return (self.children[0].Evaluate(symbolTable)[0] - self.children[1].Evaluate(symbolTable)[0], "int")
 
             elif (self.value == "*"):
-                return (self.children[0].Evaluate()[0] * self.children[1].Evaluate()[0], "int")
+                return (self.children[0].Evaluate(symbolTable)[0] * self.children[1].Evaluate(symbolTable)[0], "int")
 
             elif (self.value == "/"):
-                return (self.children[0].Evaluate()[0] // self.children[1].Evaluate()[0], "int")
+                return (self.children[0].Evaluate(symbolTable)[0] // self.children[1].Evaluate(symbolTable)[0], "int")
 
             elif (self.value == "<"):
-                if(self.children[0].Evaluate()[0] < self.children[1].Evaluate()[0]):
+                if(self.children[0].Evaluate(symbolTable)[0] < self.children[1].Evaluate(symbolTable)[0]):
                     return(1,"int")
                 else:
                     return(0,"int")
 
             elif (self.value == ">"):
-                if(self.children[0].Evaluate()[0] > self.children[1].Evaluate()[0]):
+                if(self.children[0].Evaluate(symbolTable)[0] > self.children[1].Evaluate(symbolTable)[0]):
                     return(1,"int")
                 else:
                     return(0,"int")
 
             elif (self.value == "=="):
-                if(self.children[0].Evaluate()[0] == self.children[1].Evaluate()[0]):
+                if(self.children[0].Evaluate(symbolTable)[0] == self.children[1].Evaluate(symbolTable)[0]):
                     return(1,"int")
                 else:
                     return(0,"int")
 
             elif (self.value == "&&"):
-                if(self.children[0].Evaluate()[0] and self.children[1].Evaluate()[0]):
+                if(self.children[0].Evaluate(symbolTable)[0] and self.children[1].Evaluate(symbolTable)[0]):
                     return(1,"int")
                 else:
                     return(0,"int")
 
             elif (self.value == "||"):
-                if(self.children[0].Evaluate()[0] or self.children[1].Evaluate()[0]):
+                if(self.children[0].Evaluate(symbolTable)[0] or self.children[1].Evaluate(symbolTable)[0]):
                     return(1,"int")
                 else:
                     return(0,"int")
 
             elif (self.value == "."):
-                return (str(self.children[0].Evaluate()[0]) + str(self.children[1].Evaluate()[0]), "str")
+                return (str(self.children[0].Evaluate(symbolTable)[0]) + str(self.children[1].Evaluate(symbolTable)[0]), "str")
 
 
 class UnOp(Node):
 
-    def Evaluate(self):
+    def Evaluate(self, symbolTable):
         if(self.value == "+"):
-            return (self.children[0].Evaluate()[0], "int")
+            return (self.children[0].Evaluate(symbolTable)[0], "int")
         elif (self.value == "-"):
-            return (-self.children[0].Evaluate()[0], "int")
+            return (-self.children[0].Evaluate(symbolTable)[0], "int")
         elif (self.value == "!"):
-            return (not(self.children[0].Evaluate()[0]), "int")
+            return (not(self.children[0].Evaluate(symbolTable)[0]), "int")
 
 
 class VarDec(Node):
 
-    def Evaluate(self):
+    def Evaluate(self, symbolTable):
         for child in self.children:
             SymbolTable.createIdentifier(child.value, self.value)
 
 
 class SetOp(Node):
 
-    def Evaluate(self):
+    def Evaluate(self, symbolTable):
         if self.children[0].value in SymbolTable.symbolTableDict.keys():
             SymbolTable.setIdentifier(
-                self.children[0].value, self.children[1].Evaluate()[0])
+                self.children[0].value, self.children[1].Evaluate(symbolTable)[0])
         else:
             raise ValueError(
                 "Symbol Table ERROR - Identifier not in symbol table")
@@ -165,62 +164,62 @@ class SetOp(Node):
 
 class IntVal(Node):
 
-    def Evaluate(self):
+    def Evaluate(self, symbolTable):
         return (self.value, "int")
 
 
 class StrVal(Node):
 
-    def Evaluate(self):
+    def Evaluate(self, symbolTable):
         return (self.value, "str")
 
 
 class NoOp(Node):
 
-    def Evaluate(self):
+    def Evaluate(self, symbolTable):
         pass
 
 
 class Identifier(Node):
 
-    def Evaluate(self):
+    def Evaluate(self, symbolTable):
         return SymbolTable.getIdentifier(self.value)
 
 
 class Printf(Node):
 
-    def Evaluate(self):
-        print(self.children[0].Evaluate()[0])
+    def Evaluate(self, symbolTable):
+        print(self.children[0].Evaluate(symbolTable)[0])
 
 
 class Scanf(Node):
 
-    def Evaluate(self):
+    def Evaluate(self, symbolTable):
         input_ = int(input())
         return (input_, "int")
 
 
 class Block(Node):
 
-    def Evaluate(self):
+    def Evaluate(self, symbolTable):
         for child in self.children:
-            child.Evaluate()
+            child.Evaluate(symbolTable)
 
 
 class While(Node):
 
-    def Evaluate(self):
-        while(self.children[0].Evaluate()[0]):
-            self.children[1].Evaluate()
+    def Evaluate(self, symbolTable):
+        while(self.children[0].Evaluate(symbolTable)[0]):
+            self.children[1].Evaluate(symbolTable)
 
 
 class If(Node):
 
-    def Evaluate(self):
-        if(self.children[0].Evaluate()[0]):
-            self.children[1].Evaluate()
+    def Evaluate(self, symbolTable):
+        if(self.children[0].Evaluate(symbolTable)[0]):
+            self.children[1].Evaluate(symbolTable)
         elif(len(self.children) == 3):
-            self.children[2].Evaluate()
+            self.children[2].Evaluate(symbolTable)
 
 
 class Tokenizer:
@@ -665,11 +664,11 @@ class Parser:
         postProCode = PrePro.filter(code)
         Parser.tokens = Tokenizer(postProCode)
         Parser.tokens.selectNext()
-
         result = Parser.parseBlock()
+        symbolTable = SymbolTable()
         if(Parser.tokens.actual.type != "EOF"):
             raise ValueError("run ERROR - EOF token not found")
-        return result.Evaluate()
+        return result.Evaluate(symbolTable)
 
 
 if(len(sys.argv) <= 1):
