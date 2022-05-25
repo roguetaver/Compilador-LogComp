@@ -5,10 +5,16 @@ Feito por André Tavernaro
 
 ![git status](http://3.129.230.99/svg/roguetaver/Compilador-LogComp/)
 
-Roteiro 6 - ATUAL
+Roteiro 9 - ATUAL
 
-![Alt text](diagrama-roteiro6.jpeg?raw=true "Diagrama Sintático Roteiro 6 (ATUAL)")
-![Alt text](diagrama-roteiro6-2.jpeg?raw=true "Diagrama Sintático Roteiro 6 (ATUAL)")
+![Alt text](diagrama-roteiro9.jpeg?raw=true "Diagrama Sintático Roteiro 9")
+![Alt text](diagrama-roteiro9-2.jpeg?raw=true "Diagrama Sintático Roteiro 9")
+
+
+Roteiro 6 - OK
+
+![Alt text](diagrama-roteiro6.jpeg?raw=true "Diagrama Sintático Roteiro 6")
+![Alt text](diagrama-roteiro6-2.jpeg?raw=true "Diagrama Sintático Roteiro 6")
 
 ```
 BLOCK = "{" , { STATEMENT }, "}" ;
