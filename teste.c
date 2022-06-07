@@ -1,17 +1,16 @@
 
-{
-  int i;
-  int n;
-  int f;
-  n = 5;
-  i = 2;
-  f = 1;
+int soma(int x, int y, int z) {
+  int a;
+  a = x + y + z;
+  printf(a);
+  return(a);
+}
 
-  while(i < n + 1){
-    f = f * i;
-    i = i + 1;
-  }
-
-  printf(f);
-
+int main() {
+  int a;
+  int b;
+  a = 3;
+  b = soma(a, 4, 8);
+  printf(a);
+  printf(b);
 }

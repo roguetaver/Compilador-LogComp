@@ -1,32 +1,54 @@
 import sys
 import re
 
+
+class FuncTable:
+    funcTableDict = {}
+
+    @staticmethod
+    def getFunction(functionName):
+        if(functionName in FuncTable.funcTableDict.keys()):
+            return FuncTable.funcTableDict.get(functionName)
+        else:
+            raise ValueError(
+                "Func Table ERROR - function not in func table")
+
+    @staticmethod
+    def createFunction(functionName, functionPointer):
+        if(functionName in FuncTable.funcTableDict.keys()):
+            raise ValueError(
+                "Func Table ERROR - Function already in func table")
+        else:
+            FuncTable.funcTableDict[functionName] = functionPointer
+
+
 class SymbolTable:
-    symbolTableDict = {}
+    def __init__(self):
+        self.symbolTableDict = {}
 
-    def getIdentifier(identifierName):
-        if(identifierName in SymbolTable.symbolTableDict.keys()):
-            return SymbolTable.symbolTableDict.get(identifierName)
+    def getIdentifier(self, identifierName):
+        if(identifierName in self.symbolTableDict.keys()):
+            return self.symbolTableDict.get(identifierName)
         else:
             raise ValueError(
                 "Symbol Table ERROR - Identifier not in symbol table")
 
-    def setIdentifier(identifierName, value):
-        if(identifierName in SymbolTable.symbolTableDict.keys()):
-            if(SymbolTable.symbolTableDict[identifierName][1] == "str" and type(value) == str
-               or SymbolTable.symbolTableDict[identifierName][1] == "int" and str(value).isnumeric()):
-                SymbolTable.symbolTableDict[identifierName] = (
-                    value, SymbolTable.symbolTableDict[identifierName][1])
+    def setIdentifier(self, identifierName, value):
+        if(identifierName in self.symbolTableDict.keys()):
+            if(self.symbolTableDict[identifierName][1] == "str" and type(value) == str
+               or self.symbolTableDict[identifierName][1] == "int" and str(value).isnumeric()):
+                self.symbolTableDict[identifierName] = (
+                    value, self.symbolTableDict[identifierName][1])
         else:
             raise ValueError(
                 "Symbol Table ERROR - Identifier not in symbol table")
 
-    def createIdentifier(identifierName, type):
-        if(identifierName in SymbolTable.symbolTableDict.keys()):
+    def createIdentifier(self, identifierName, type):
+        if(identifierName in self.symbolTableDict.keys()):
             raise ValueError(
                 "Symbol Table ERROR - Identifier already in symbol table")
         else:
-            SymbolTable.symbolTableDict[identifierName] = (None, type)
+            self.symbolTableDict[identifierName] = (None, type)
 
 
 class Token:
@@ -46,7 +68,7 @@ class Node:
         self.value = value
         self.children = children
 
-    def Evaluate():
+    def Evaluate(self, symbolTable):
         pass
 
 
@@ -58,25 +80,25 @@ class BinOp(Node):
 
             if (self.value == "=="):
                 if(self.children[0].Evaluate(symbolTable)[0] == self.children[1].Evaluate(symbolTable)[0]):
-                    return(1,"str")
+                    return(1, "str")
                 else:
-                    return(0,"str")
+                    return(0, "str")
 
             elif (self.value == "."):
                 return (self.children[0].Evaluate(symbolTable)[0] + self.children[1].Evaluate(symbolTable)[0], "str")
-            
+
             elif (self.value == "<"):
                 if(self.children[0].Evaluate(symbolTable)[0] < self.children[1].Evaluate(symbolTable)[0]):
-                    return(1,"str")
+                    return(1, "str")
                 else:
-                    return(0,"str")
+                    return(0, "str")
 
             elif (self.value == ">"):
                 if(self.children[0].Evaluate(symbolTable)[0] > self.children[1].Evaluate(symbolTable)[0]):
-                    return(1,"str")
+                    return(1, "str")
                 else:
-                    return(0,"str")
-        
+                    return(0, "str")
+
         elif (self.children[0].Evaluate(symbolTable)[1] == "str" and self.children[1].Evaluate(symbolTable)[1] != "str"):
             if (self.value == "."):
                 return (self.children[0].Evaluate(symbolTable)[0] + str(self.children[1].Evaluate(symbolTable)[0]), "str")
@@ -101,33 +123,33 @@ class BinOp(Node):
 
             elif (self.value == "<"):
                 if(self.children[0].Evaluate(symbolTable)[0] < self.children[1].Evaluate(symbolTable)[0]):
-                    return(1,"int")
+                    return(1, "int")
                 else:
-                    return(0,"int")
+                    return(0, "int")
 
             elif (self.value == ">"):
                 if(self.children[0].Evaluate(symbolTable)[0] > self.children[1].Evaluate(symbolTable)[0]):
-                    return(1,"int")
+                    return(1, "int")
                 else:
-                    return(0,"int")
+                    return(0, "int")
 
             elif (self.value == "=="):
                 if(self.children[0].Evaluate(symbolTable)[0] == self.children[1].Evaluate(symbolTable)[0]):
-                    return(1,"int")
+                    return(1, "int")
                 else:
-                    return(0,"int")
+                    return(0, "int")
 
             elif (self.value == "&&"):
                 if(self.children[0].Evaluate(symbolTable)[0] and self.children[1].Evaluate(symbolTable)[0]):
-                    return(1,"int")
+                    return(1, "int")
                 else:
-                    return(0,"int")
+                    return(0, "int")
 
             elif (self.value == "||"):
                 if(self.children[0].Evaluate(symbolTable)[0] or self.children[1].Evaluate(symbolTable)[0]):
-                    return(1,"int")
+                    return(1, "int")
                 else:
-                    return(0,"int")
+                    return(0, "int")
 
             elif (self.value == "."):
                 return (str(self.children[0].Evaluate(symbolTable)[0]) + str(self.children[1].Evaluate(symbolTable)[0]), "str")
@@ -148,14 +170,14 @@ class VarDec(Node):
 
     def Evaluate(self, symbolTable):
         for child in self.children:
-            SymbolTable.createIdentifier(child.value, self.value)
+            symbolTable.createIdentifier(child.value, self.value)
 
 
 class SetOp(Node):
 
     def Evaluate(self, symbolTable):
-        if self.children[0].value in SymbolTable.symbolTableDict.keys():
-            SymbolTable.setIdentifier(
+        if self.children[0].value in symbolTable.symbolTableDict.keys():
+            symbolTable.setIdentifier(
                 self.children[0].value, self.children[1].Evaluate(symbolTable)[0])
         else:
             raise ValueError(
@@ -183,7 +205,7 @@ class NoOp(Node):
 class Identifier(Node):
 
     def Evaluate(self, symbolTable):
-        return SymbolTable.getIdentifier(self.value)
+        return symbolTable.getIdentifier(self.value)
 
 
 class Printf(Node):
@@ -203,6 +225,9 @@ class Block(Node):
 
     def Evaluate(self, symbolTable):
         for child in self.children:
+            # interromper block quando for return
+            if child.value == "return":
+                return child.Evaluate(symbolTable)
             child.Evaluate(symbolTable)
 
 
@@ -218,13 +243,48 @@ class If(Node):
     def Evaluate(self, symbolTable):
         if(self.children[0].Evaluate(symbolTable)[0]):
             self.children[1].Evaluate(symbolTable)
-        elif(len(self.children) == 3):
+        elif(len(self.children) > 2):
             self.children[2].Evaluate(symbolTable)
+
+
+class ReturnFunction(Node):
+
+    def Evaluate(self, symbolTable):
+        return self.children[0].Evaluate(symbolTable)
+
+
+class FuncDec(Node):
+
+    def Evaluate(self, symbolTable):
+        FuncTable.createFunction(self.value, self)
+        return
+
+
+class FuncCall(Node):
+
+    def Evaluate(self, symbolTable):
+
+        arg_list = []
+        function_symbol_table = SymbolTable()
+        function_content = FuncTable.getFunction(self.value)
+
+        for i in range(1, len(function_content.children)-1):
+            arg_list.append(function_content.children[i].children[0].value)
+            function_content.children[i].Evaluate(function_symbol_table)
+
+        for j in range(len(arg_list)):
+            function_symbol_table.setIdentifier(
+                arg_list[j], self.children[j].Evaluate(symbolTable)[0])
+
+        result = function_content.children[len(function_content.children)-1].Evaluate(function_symbol_table)
+
+        return result
 
 
 class Tokenizer:
 
-    reservedWords = ["printf", "if", "else", "while", "scanf", "int", "str"]
+    reservedWords = ["printf", "if", "else", "while",
+                     "scanf", "int", "str", "void", "return"]
 
     def __init__(self, origin):
         self.origin = origin  # codigo fonte que sera tokenizado
@@ -380,13 +440,81 @@ class Parser:
     tokens = None  # objeto da classe que era ler o codigo fonte e alimentar o analisador
 
     @staticmethod
+    def parseProgram():
+        functions_list = []
+
+        while (Parser.tokens.actual.type != "EOF"):
+            functions_list.append(Parser.parseDeclaration())
+
+        node = Block("block", functions_list)
+
+        return node
+
+    @staticmethod
+    def parseDeclaration():
+        arg_list = []
+        if(Parser.tokens.actual.type == "str" or Parser.tokens.actual.type == "int" or Parser.tokens.actual.type == "void"):
+            arg_type = Parser.tokens.actual.type
+            Parser.tokens.selectNext()
+            if(Parser.tokens.actual.type == "identifier"):
+                node = VarDec(arg_type, [Parser.tokens.actual])
+                function_name = Parser.tokens.actual.value
+                arg_list.append(node)
+                Parser.tokens.selectNext()
+                if(Parser.tokens.actual.type == "openParentheses"):
+                    Parser.tokens.selectNext()
+                    if(Parser.tokens.actual.type == "str" or Parser.tokens.actual.type == "int"):
+                        arg_type = Parser.tokens.actual.type
+                        Parser.tokens.selectNext()
+                        if(Parser.tokens.actual.type == "identifier"):
+                            node = VarDec(arg_type, [Parser.tokens.actual])
+                            arg_list.append(node)
+                            Parser.tokens.selectNext()
+                            while Parser.tokens.actual.type == "comma":
+                                Parser.tokens.selectNext()
+                                if(Parser.tokens.actual.type == "str" or Parser.tokens.actual.type == "int"):
+                                    arg_type = Parser.tokens.actual.type
+                                    Parser.tokens.selectNext()
+                                    if(Parser.tokens.actual.type == "identifier"):
+                                        node = VarDec(
+                                            arg_type, [Parser.tokens.actual])
+                                        arg_list.append(node)
+                                        Parser.tokens.selectNext()
+                                else:
+                                    raise ValueError(
+                                        "parseDeclaration ERROR - type not found ")
+                        else:
+                            raise ValueError(
+                                "parseDeclaration ERROR - identifier token not found ")
+
+                    if Parser.tokens.actual.type == "closeParentheses":
+                        Parser.tokens.selectNext()
+                        node = Parser.parseBlock()
+                        arg_list.append(node)
+                    else:
+                        raise ValueError(
+                            "parseDeclaration ERROR - close parenthesis token not found ")
+                else:
+                    raise ValueError(
+                        "parseDeclaration ERROR - open parenthesis not found ")
+            else:
+                raise ValueError(
+                    "parseDeclaration ERROR - identifier not found ")
+        else:
+            raise ValueError(
+                "parseDeclaration ERROR - type not found ")
+
+        node = FuncDec(function_name, arg_list)
+        return node
+
+    @staticmethod
     def parseBlock():
         children = []
         if(Parser.tokens.actual.type == "openCurlyBrackets"):
             Parser.tokens.selectNext()
             while (Parser.tokens.actual.type != "closeCurlyBrackets"):
                 children.append(Parser.parseStatement())
-            node = Block(0, children)
+            node = Block("block", children)
             Parser.tokens.selectNext()
         else:
             raise ValueError(
@@ -397,7 +525,7 @@ class Parser:
     def parseStatement():
 
         if(Parser.tokens.actual.type == "identifier"):
-
+            function_name = Parser.tokens.actual.value
             node = Identifier(Parser.tokens.actual.value, [])
             Parser.tokens.selectNext()
 
@@ -411,9 +539,58 @@ class Parser:
                 else:
                     raise ValueError(
                         "parseStatement ERROR - semicolon token not found")
+
+            elif Parser.tokens.actual.type == "openParentheses":
+                arg_list = []
+                Parser.tokens.selectNext()
+                if Parser.tokens.actual.type != "closeParentheses":
+                    node = Parser.parseRelExpression()
+                    arg_list.append(node)
+                    while Parser.tokens.actual.type == "comma":
+                        Parser.tokens.selectNext()
+                        node = Parser.parseRelExpression()
+                        arg_list.append(node)
+                    if Parser.tokens.actual.type == "closeParentheses":
+                        Parser.tokens.selectNext()
+                        node = FuncCall(function_name, arg_list)
+                    else:
+                        raise ValueError(
+                            "parseStatement ERROR - close parenthesis not found")
+
+                elif Parser.tokens.actual.type == "closeParentheses":
+                    Parser.tokens.selectNext()
+                    if(Parser.tokens.actual.type == "semicolon"):
+                        Parser.tokens.selectNext()
+                    else:
+                        raise ValueError(
+                            "parseStatement ERROR - semicolon token not found")
+
             else:
                 raise ValueError(
-                    "parseStatement ERROR - assign token not found")
+                    "parseStatement ERROR - assign or ( token not found")
+
+        elif Parser.tokens.actual.type == "return":
+
+            Parser.tokens.selectNext()
+            if(Parser.tokens.actual.type == "openParentheses"):
+
+                Parser.tokens.selectNext()
+                node = ReturnFunction("return", [Parser.parseRelExpression()])
+
+                if(Parser.tokens.actual.type == "closeParentheses"):
+                    Parser.tokens.selectNext()
+
+                    if(Parser.tokens.actual.type == "semicolon"):
+                        Parser.tokens.selectNext()
+                    else:
+                        raise ValueError(
+                            "parseStatement ERROR - semicolon token not found")
+                else:
+                    raise ValueError(
+                        "parseStatement ERROR - closed Parentheses token not found")
+            else:
+                raise ValueError(
+                    "parseStatement ERROR - opened Parentheses token not found")
 
         elif(Parser.tokens.actual.type == "printf"):
 
@@ -541,8 +718,32 @@ class Parser:
             Parser.tokens.selectNext()
 
         elif(Parser.tokens.actual.type == "identifier"):
+            function_name = Parser.tokens.actual.value
             node = Identifier(Parser.tokens.actual.value, [])
+            arg_list = []
             Parser.tokens.selectNext()
+            if(Parser.tokens.actual.type == "openParentheses"):
+                Parser.tokens.selectNext()
+                if(Parser.tokens.actual.type != "closeParentheses"):
+                    node = Parser.parseRelExpression()
+                    arg_list.append(node)
+                    while(Parser.tokens.actual.type == "comma"):
+                        Parser.tokens.selectNext()
+                        node = Parser.parseRelExpression()
+                        arg_list.append(node)
+                    if(Parser.tokens.actual.type == "closeParentheses"):
+                        Parser.tokens.selectNext()
+                        node = FuncCall(function_name, arg_list)
+                    else:
+                        raise ValueError(
+                            "parseFactor ERROR - closed Parentheses token not found")
+
+                elif(Parser.tokens.actual.type == "closeParentheses"):
+                    Parser.tokens.selectNext()
+
+                else:
+                    raise ValueError(
+                        "parseFactor ERROR - wrong token")
 
         elif(Parser.tokens.actual.type == "minus"):
             Parser.tokens.selectNext()
@@ -664,16 +865,20 @@ class Parser:
         postProCode = PrePro.filter(code)
         Parser.tokens = Tokenizer(postProCode)
         Parser.tokens.selectNext()
-        result = Parser.parseBlock()
-        symbolTable = SymbolTable()
+        result = Parser.parseProgram()
+
         if(Parser.tokens.actual.type != "EOF"):
             raise ValueError("run ERROR - EOF token not found")
-        return result.Evaluate(symbolTable)
+
+        result.children.append(FuncCall("main", []))
+
+        return result
 
 
 if(len(sys.argv) <= 1):
     raise ValueError("ERROR - missing input")
 
-
 arg = str(sys.argv[1])
-Parser.run(arg)
+symbolTable = SymbolTable()
+res = Parser.run(arg)
+res.Evaluate(symbolTable)
