@@ -10,6 +10,47 @@ Roteiro 9 - ATUAL
 ![Alt text](diagrama-roteiro9.jpg?raw=true "Diagrama Sintático Roteiro 9")
 ![Alt text](diagrama-roteiro9-2.jpg?raw=true "Diagrama Sintático Roteiro 9")
 
+```
+PROGRAM = (λ | DECLARATION);
+
+DECLARATION = ("int" | "str" | "void"), IDENTIFIER, "(", { ("int" | "str"), IDENTIFIER, { "," | ("int" | "str"), IDENTIFIER} }, ")", BLOCK;
+
+BLOCK = ("{", STATEMENT, "}" | "{", "}");
+
+STATEMENT =  (((λ | ASSIGNMENT | PRINT  | VAR_TYPE | RETURN), ";") | (BLOCK | IF | WHILE));
+
+FACTOR = INT | STRING | (IDENTIFIER, { "(", { RELEXPRESSION, { "," | RELEXPRESSION } } ")" }) | (("+" | "-" | "!" FACTOR) | "(", RELEXPRESSION, ")" | SCANF;
+
+TERM = FACTOR, { ("*" | "/" | "&&"), FACTOR };
+
+EXPRESSION = TERM, { ("+" | "-" | "||"), TERM } ;
+
+RELEXPRESSION = EXPRESSION , {("<" | ">" | "==") , EXPRESSION } ;
+
+WHILE = "while", "(", RELEXPRESSION ,")", STATEMENT;
+
+IF = "if", "(", RELEXPRESSION ,")", STATEMENT, (("else", STATEMENT) | λ );
+
+ASSIGNMENT = (IDENTIFIER, "=", RELEXPRESSION) | ( "(", { RELEXPRESSION, { "," | RELEXPRESSION } }, ")" );
+
+RETURN = "return" , "(", RELEXPRESSION, ")";
+
+PRINT = "printf", "(", RELEXPRESSION, ")";
+
+SCANF = "scanf", "(", ")";
+
+IDENTIFIER = LETTER, { LETTER | DIGIT | "_" };
+
+DIGIT = (0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9);
+
+INT = DIGIT, { DIGIT };
+
+VAR_TYPE = ("int" | "str") , IDENTIFIER , (λ | {"," , IDENTIFIER });
+
+STRING = """, (LETTER | DIGIT), """;
+
+LETTER = ( a | ... | z | A | ... | Z ) ;
+```
 
 Roteiro 6 - OK
 
